@@ -2,6 +2,8 @@ const sync = require('../../services/sync');
 const auth = require('../../services/auth');
 const { formatTime } = require('../../utils/format');
 const { getUserId, ownershipBlock } = require('../../utils/ownership');
+const { getBackendContext } = require('../../utils/backend');
+const config = require('../../config');
 
 Page({
   data: { item: null, syncing: false, syncedRecord: null, error: '' },
@@ -11,11 +13,16 @@ Page({
     const item = sync.getQueue().find((entry) => entry.clientRequestId === this.clientRequestId);
     if (item) {
       const currentUserId = getUserId(wx.getStorageSync('mind_trace_user'));
-      const block = ownershipBlock(item, currentUserId);
+      const block = ownershipBlock(item, currentUserId, getBackendContext(config));
+      const reasons = { accountChanged: '账号已变化', backendChanged: '后端已变化', backendMissing: '缺少后端标识', backendUnknown: '后端待确认', ownerMissing: '缺少账号标识' };
       item.createdAtText = formatTime(item.createdAt);
       item.emotionsText = (item.payload.emotions || []).join('、');
       item.canRetry = !block;
-      item.syncStateText = item.blockReason === 'accountChanged' ? '账号已变化' : ({ queued: '待同步', sending: '同步中', uncertain: '结果待确认', failed: '同步失败', blocked: '同步已阻止' }[item.syncState] || '待同步');
+      item.blockReason = block ? block.reason : (item.blockReason || '');
+      item.errorMessage = block ? block.message : item.errorMessage;
+      item.retryBlockedText = block && block.reason === 'accountChanged' ? '账号已变化，禁止同步'
+        : (block && block.reason === 'backendChanged' ? '后端已变化，禁止同步' : '归属校验未通过，禁止同步');
+      item.syncStateText = reasons[item.blockReason] || ({ queued: '待同步', sending: '同步中', uncertain: '结果待确认', failed: '同步失败', blocked: '同步已阻止' }[item.syncState] || '待同步');
     }
     this.setData({ item: item || null });
   },

@@ -22,21 +22,28 @@ Page({
   },
   refreshOffline() {
     const labels = { queued: '待同步', sending: '同步中', uncertain: '结果待确认', failed: '同步失败', blocked: '同步已阻止' };
+    const reasons = { accountChanged: '账号已变化', backendChanged: '后端已变化', backendMissing: '缺少后端标识', backendUnknown: '后端待确认', ownerMissing: '缺少账号标识' };
     const queue = sync.getQueue();
     const offlineItems = queue.map((item) => ({
       clientRequestId: item.clientRequestId,
       ownerUserId: item.ownerUserId,
+      backendMode: item.backendMode || '',
+      backendEnv: item.backendEnv || '',
       triggerEvent: item.payload.triggerEvent,
       loopThought: item.payload.loopThought,
       emotionsText: (item.payload.emotions || []).join('、'),
       intensity: item.payload.intensity,
       syncState: item.syncState,
       blockReason: item.blockReason || '',
-      syncStateText: item.blockReason === 'accountChanged' ? '账号已变化' : (labels[item.syncState] || '待同步'),
+      syncStateText: reasons[item.blockReason] || labels[item.syncState] || '待同步',
       errorMessage: item.errorMessage || '',
       createdAtText: formatTime(item.createdAt)
     }));
-    this.setData({ offlineItems, hasBlockedAccountChange: queue.some((item) => item.blockReason === 'accountChanged') });
+    this.setData({
+      offlineItems,
+      hasBlockedAccountChange: queue.some((item) => item.blockReason === 'accountChanged'),
+      hasBlockedBackend: queue.some((item) => ['backendChanged', 'backendMissing', 'backendUnknown'].includes(item.blockReason))
+    });
   },
   changeTab(event) {
     this.setData({ tab: event.currentTarget.dataset.tab });

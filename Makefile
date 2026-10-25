@@ -2,7 +2,7 @@
 
 test:
 	cd server && go test ./... && go vet ./...
-	cd miniprogram && node tests/run.js
+	cd miniprogram && node tests/run.js && node scripts/check-syntax.js && node cloudfunctions/mindTrace/test/domain.test.js
 	cd web && npm run build
 
 build:

@@ -1,3 +1,5 @@
+const { ownershipBlock } = require('./ownership');
+
 function createClientRequestId() {
   const time = Date.now().toString(36);
   const random = Math.random().toString(36).slice(2, 10);
@@ -21,9 +23,9 @@ function removeQueueItem(queue, clientRequestId) {
   return (Array.isArray(queue) ? queue : []).filter((item) => item.clientRequestId !== clientRequestId);
 }
 
-function canAutoSync(item, currentUserId) {
-  return Boolean(item && item.syncState === 'queued' && item.clientRequestId && item.ownerUserId && currentUserId
-    && String(item.ownerUserId) === String(currentUserId));
+function canAutoSync(item, currentUserId, currentBackend) {
+  return Boolean(item && item.syncState === 'queued' && item.clientRequestId
+    && !ownershipBlock(item, currentUserId, currentBackend));
 }
 
 module.exports = { createClientRequestId, nextQueue, markQueueItem, removeQueueItem, canAutoSync };

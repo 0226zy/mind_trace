@@ -5,6 +5,7 @@
   "libVersion": "3.8.12",
   "projectname": "mind-trace",
   "miniprogramRoot": "./",
+  "cloudfunctionRoot": "cloudfunctions/",
   "setting": {
     "urlCheck": false,
     "es6": true,

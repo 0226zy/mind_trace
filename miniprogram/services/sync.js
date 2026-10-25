@@ -2,6 +2,7 @@ const config = require('../config');
 const api = require('./api');
 const offline = require('../utils/offline');
 const { getUserId, ownershipBlock, reconcileQueueOwnership } = require('../utils/ownership');
+const { getBackendContext } = require('../utils/backend');
 
 let flushing = null;
 
@@ -18,22 +19,28 @@ function storedUserId() {
   return getUserId(wx.getStorageSync('mind_trace_user'));
 }
 
+function currentBackend() {
+  return getBackendContext(config);
+}
+
 function blockError(block) {
   const error = new Error(block.message);
   error.accountChanged = block.reason === 'accountChanged';
+  error.backendChanged = block.reason === 'backendChanged';
   error.blockReason = block.reason;
   return error;
 }
 
 function reconcileAccount(user) {
   const currentUserId = getUserId(user) || storedUserId();
-  return saveQueue(reconcileQueueOwnership(getQueue(), currentUserId));
+  return saveQueue(reconcileQueueOwnership(getQueue(), currentUserId, currentBackend()));
 }
 
 function enqueue(payload) {
   const ownerUserId = storedUserId();
-  const block = ownershipBlock({ ownerUserId }, ownerUserId);
-  const item = {
+  const backend = currentBackend();
+  const block = ownershipBlock(Object.assign({ ownerUserId }, backend), ownerUserId, backend);
+  const item = Object.assign({
     clientRequestId: payload.clientRequestId || offline.createClientRequestId(),
     ownerUserId,
     payload: Object.assign({}, payload),
@@ -41,7 +48,7 @@ function enqueue(payload) {
     blockReason: block ? block.reason : '',
     createdAt: new Date().toISOString(),
     errorMessage: block ? block.message : ''
-  };
+  }, backend);
   item.payload.clientRequestId = item.clientRequestId;
   saveQueue(offline.nextQueue(getQueue(), item));
   return item;
@@ -55,14 +62,18 @@ async function syncItem(clientRequestId, user) {
   const item = getQueue().find((entry) => entry.clientRequestId === clientRequestId);
   if (!item) throw new Error('这条本地记录已不存在');
   const currentUserId = getUserId(user) || storedUserId();
-  const block = ownershipBlock(item, currentUserId);
+  const backend = currentBackend();
+  const block = ownershipBlock(item, currentUserId, backend);
   if (block) {
     patchItem(clientRequestId, { syncState: 'blocked', blockReason: block.reason, errorMessage: block.message });
     throw blockError(block);
   }
   patchItem(clientRequestId, { syncState: 'sending', blockReason: '', errorMessage: '' });
   try {
-    const result = await api.createRecord(item.payload, { expectedOwnerUserId: item.ownerUserId });
+    const result = await api.createRecord(item.payload, {
+      expectedOwnerUserId: item.ownerUserId,
+      expectedBackend: { backendMode: item.backendMode, backendEnv: item.backendEnv }
+    });
     saveQueue(offline.removeQueueItem(getQueue(), clientRequestId));
     return result;
   } catch (error) {
@@ -83,12 +94,13 @@ async function syncItem(clientRequestId, user) {
 function flushQueue(user) {
   if (flushing) return flushing;
   const currentUserId = getUserId(user) || storedUserId();
+  const backend = currentBackend();
   reconcileAccount(user);
   flushing = (async () => {
     const queue = getQueue();
     for (let index = 0; index < queue.length; index += 1) {
       const current = getQueue().find((entry) => entry.clientRequestId === queue[index].clientRequestId);
-      if (!offline.canAutoSync(current, currentUserId)) continue;
+      if (!offline.canAutoSync(current, currentUserId, backend)) continue;
       try {
         await syncItem(current.clientRequestId, user);
       } catch (error) {

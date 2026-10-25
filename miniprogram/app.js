@@ -1,10 +1,21 @@
 const auth = require('./services/auth');
 const sync = require('./services/sync');
+const config = require('./config');
+const { initializeCloud } = require('./services/cloud-transport');
 
 App({
-  globalData: { user: null, networkConnected: true, deletionEpoch: 0 },
+  globalData: { user: null, networkConnected: true, deletionEpoch: 0, initializationError: '' },
 
   onLaunch() {
+    if (config.DATA_MODE === 'cloud') {
+      try {
+        initializeCloud(wx, config.CLOUD_ENV);
+      } catch (error) {
+        this.globalData.initializationError = error.message;
+        wx.showToast({ title: error.message, icon: 'none', duration: 5000 });
+        return;
+      }
+    }
     sync.recoverInterruptedQueue();
     this.loginInBackground();
     wx.getNetworkType({

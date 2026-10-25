@@ -1,0 +1,17 @@
+{
+  "name": "mind-trace-cloud-function",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mind Trace WeChat Cloud Development backend",
+  "main": "index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check index.js && node --check domain.js && node --check test/domain.test.js"
+  },
+  "dependencies": {
+    "wx-server-sdk": "4.0.2"
+  }
+}

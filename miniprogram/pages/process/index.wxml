@@ -4,6 +4,7 @@
   <view wx:if="{{offlineItems.length}}" class="offline-panel">
     <view class="row-between"><view><view class="offline-title">本机待同步 · {{offlineItems.length}}</view><text class="list-meta">登记已保存在本机，不会因断网丢失</text></view><button class="text-btn" bindtap="syncNow" disabled="{{syncing}}">{{syncing ? '检查中' : '立即同步'}}</button></view>
     <view wx:if="{{hasBlockedAccountChange}}" class="notice notice-warm account-warning">检测到账号变化。旧账号的本地记录已停止同步并完整保留，不会写入新账号。</view>
+    <view wx:if="{{hasBlockedBackend}}" class="notice notice-warm account-warning">检测到后端模式或环境变化，或旧记录缺少后端标识。相关记录已停止同步并完整保留，不会跨环境重放。</view>
     <view class="local-item" wx:for="{{offlineItems}}" wx:key="clientRequestId" data-id="{{item.clientRequestId}}" bindtap="openLocal">
       <view class="row-between"><text class="local-item-title wrap">{{item.triggerEvent}}</text><text class="tag {{item.syncState === 'uncertain' || item.syncState === 'failed' || item.syncState === 'blocked' ? 'tag-warm' : 'tag-neutral'}}">{{item.syncStateText}}</text></view>
       <text class="list-meta">强度 {{item.intensity}} · {{item.createdAtText}}</text>

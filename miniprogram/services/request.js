@@ -1,19 +1,24 @@
 const config = require('../config');
 const { getUserId, ownershipBlock } = require('../utils/ownership');
+const { selectTransport } = require('../utils/data-mode');
+const { cloudRequest } = require('./cloud-transport');
+const { getBackendContext } = require('../utils/backend');
 
-function assertExpectedOwner(expectedOwnerUserId) {
+function assertExpectedOwner(expectedOwnerUserId, expectedBackend) {
   if (!expectedOwnerUserId) return;
   const currentUserId = getUserId(wx.getStorageSync('mind_trace_user'));
-  const block = ownershipBlock({ ownerUserId: expectedOwnerUserId }, currentUserId);
+  const expected = Object.assign({ ownerUserId: expectedOwnerUserId }, expectedBackend || {});
+  const block = ownershipBlock(expected, currentUserId, getBackendContext(config));
   if (block) {
     const error = new Error(block.message);
     error.accountChanged = block.reason === 'accountChanged';
+    error.backendChanged = block.reason === 'backendChanged';
     error.blockReason = block.reason;
     throw error;
   }
 }
 
-function rawRequest(options) {
+function rawHttpRequest(options) {
   return new Promise((resolve, reject) => {
     const token = wx.getStorageSync('mind_trace_token');
     wx.request({
@@ -45,17 +50,23 @@ function rawRequest(options) {
   });
 }
 
+function rawRequest(options) {
+  const transport = selectTransport(config.DATA_MODE, { cloud: cloudRequest, http: rawHttpRequest });
+  return transport(options);
+}
+
 async function request(options) {
   const requestOwnerUserId = options.expectedOwnerUserId || getUserId(wx.getStorageSync('mind_trace_user'));
-  assertExpectedOwner(requestOwnerUserId);
+  const requestBackend = options.expectedBackend || getBackendContext(config);
+  assertExpectedOwner(requestOwnerUserId, requestBackend);
   try {
     return await rawRequest(options);
   } catch (error) {
     if (error.statusCode === 401 && options.auth !== false && !options.retried) {
       const auth = require('./auth');
       await auth.ensureLogin(true);
-      // 所有旧请求都禁止在内部用户变化后重放；队列还使用不可变的 ownerUserId。
-      assertExpectedOwner(requestOwnerUserId);
+      // 用户与后端环境都必须和发起时一致，才允许重试原请求。
+      assertExpectedOwner(requestOwnerUserId, requestBackend);
       return rawRequest(Object.assign({}, options, { retried: true }));
     }
     throw error;
@@ -64,3 +75,5 @@ async function request(options) {
 
 module.exports = request;
 module.exports.raw = rawRequest;
+module.exports.http = rawHttpRequest;
+module.exports.cloud = cloudRequest;

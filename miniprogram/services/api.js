@@ -10,7 +10,11 @@ const api = {
   deleteMe: () => request({ path: '/me', method: 'DELETE' }),
   dashboard: () => request({ path: '/dashboard' }),
   matchThoughts: (text) => request({ path: '/thoughts/match', method: 'POST', data: { text } }),
-  createRecord: (payload, options) => request({ path: '/records', method: 'POST', data: payload, expectedOwnerUserId: options && options.expectedOwnerUserId }),
+  createRecord: (payload, options) => request({
+    path: '/records', method: 'POST', data: payload,
+    expectedOwnerUserId: options && options.expectedOwnerUserId,
+    expectedBackend: options && options.expectedBackend
+  }),
   records: (params) => request({ path: `/records?${queryString(params)}` }),
   record: (id) => request({ path: `/records/${encodeURIComponent(id)}` }),
   saveEvaluation: (id, payload) => request({ path: `/records/${encodeURIComponent(id)}`, method: 'PATCH', data: payload }),

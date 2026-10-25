@@ -1,10 +1,21 @@
 # 止念（mind_trace）原生微信小程序
 
-## 配置
+## 双模式配置
 
-在 `config.js` 修改 `API_BASE`，其值应包含 `/api/v1`。生产环境需在微信公众平台配置对应 request 合法域名并开启 HTTPS。微信 `AppSecret` 只能保存在服务端，不能写入小程序。
+默认 `DATA_MODE: 'cloud'`，所有页面仍通过 `services/api.js` 访问数据，不直接使用 `wx.cloud.database`。
 
-项目使用 `touristappid`、`compileType=miniprogram`，无 npm 运行时依赖、无 TypeScript、无跨端框架。
+### 微信云开发（默认）
+
+1. 将 `project.config.json` 中的 `touristappid` 替换为已开通云开发的真实小程序 AppID；游客 AppID 不能用于真实云环境。
+2. 在微信开发者工具中创建并选择云环境，部署 `cloudfunctions/mindTrace` 云函数并安装其依赖。
+3. `CLOUD_ENV: ''` 使用默认云环境；需要指定环境时填写环境 ID。`CLOUD_FUNCTION_NAME` 默认为 `mindTrace`。
+4. 云模式通过云函数上下文识别用户，不调用 `wx.login`、不依赖 token，也不需要配置 HTTP request 合法域名。
+
+### HTTP（保留 Go API）
+
+将 `config.js` 的 `DATA_MODE` 改为 `'http'`，并把 `API_BASE` 配置为包含 `/api/v1` 的 HTTPS 地址。生产环境需在微信公众平台配置 request 合法域名。HTTP 模式继续使用 `wx.login` 换取 token；AppSecret 只能保存在服务端，不能写入小程序。
+
+项目使用 `compileType=miniprogram`，无小程序端 npm 运行时依赖、无 TypeScript、无跨端框架。`cloudfunctionRoot` 为 `cloudfunctions/`，测试、脚本和构建产物不会作为小程序代码上传。
 
 ## 离线与幂等约定
 
