@@ -1,0 +1,12 @@
+<view class="page profile-page">
+  <view class="header"><view class="header-copy"><text class="eyebrow">你的数据，由你决定</text><view class="h1">我的</view></view></view>
+  <state-view loading="{{loading}}" error="{{error}}" bind:retry="load" />
+  <view wx:if="{{user}}" class="profile-card card"><view class="avatar">{{user.displayInitial}}</view><view><view class="profile-name">{{user.nickname || '微信用户'}}</view><text class="list-meta">通过微信安全登录</text></view></view>
+  <view class="menu-list">
+    <button class="menu-item" bindtap="goStats"><view><text class="menu-title">统计洞察</text><text class="menu-desc">查看完成率、情绪与复发模式</text></view><text>→</text></button>
+    <button class="menu-item" bindtap="goProcess"><view><text class="menu-title">本地待同步</text><text class="menu-desc">{{pendingLocal ? pendingLocal + ' 条登记尚未确认同步' : '没有待同步登记'}}</text></view><text>→</text></button>
+  </view>
+  <view class="privacy-section"><view class="section-title">隐私说明</view><view class="notice">止念只使用微信登录凭证换取账号 token，不在小程序源码保存 AppSecret，不申请通讯录、位置等无关权限。思虑正文仅用于你本人的记录、检索和统计。</view><view class="notice privacy-note">未提交的速记与评估草稿保存在本机。离线登记联网后同步；发送结果不确定时会暂停自动重试，避免重复版本。</view></view>
+  <view class="danger-zone"><view class="section-title">数据管理</view><text class="muted body-small">注销账号并删除当前用户在服务端的全部思虑、版本与统计数据。本机速记和离线队列也会被清除。</text><button class="danger-btn full-btn delete-btn" bindtap="showDelete">删除账号与全部数据</button></view>
+</view>
+<view wx:if="{{deleteVisible}}" class="delete-mask" bindtap="hideDelete" catchtouchmove="stopTouch"><view class="delete-dialog" catchtap="stopTouch" role="dialog" aria-label="确认删除全部数据"><view class="h2">这项操作无法撤销</view><text class="delete-warning">服务端与本机的思虑数据将被永久删除。请先确认离线登记已经同步。</text><text class="field-label confirm-label">请输入“删除全部数据”以确认</text><input class="input" value="{{confirmText}}" bindinput="onConfirmInput" placeholder="删除全部数据" /><view class="button-row delete-actions"><button class="quiet-btn" bindtap="hideDelete" disabled="{{deleting}}">取消</button><button class="danger-btn" bindtap="deleteAll" disabled="{{confirmText !== '删除全部数据' || deleting}}">{{deleting ? '正在删除…' : '永久删除'}}</button></view></view></view>

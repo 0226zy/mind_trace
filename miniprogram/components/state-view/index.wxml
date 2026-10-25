@@ -1,0 +1,13 @@
+<view wx:if="{{loading}}" class="empty-space" aria-live="polite">
+  <view class="loading-ring"></view>
+  <text>{{loadingText || '正在加载…'}}</text>
+</view>
+<view wx:elif="{{error}}" class="empty-space">
+  <text class="empty-title">暂时没有加载成功</text>
+  <text class="wrap">{{error}}</text>
+  <button class="quiet-btn retry-btn" bindtap="onRetry">重新加载</button>
+</view>
+<view wx:elif="{{empty}}" class="empty-space">
+  <text class="empty-title">{{emptyTitle || '这里还很安静'}}</text>
+  <text class="wrap">{{emptyText}}</text>
+</view>

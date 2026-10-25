@@ -1,0 +1,15 @@
+.profile-card { display: flex; align-items: center; gap: 24rpx; }
+.avatar { width: 88rpx; height: 88rpx; border-radius: 50%; background: #DFE7E8; color: #526F7D; display: flex; align-items: center; justify-content: center; font-size: 34rpx; }
+.profile-name { font-size: 32rpx; font-weight: 600; }
+.menu-list { margin-top: 36rpx; }
+.menu-item { width: 100%; min-height: 120rpx; padding: 24rpx 4rpx; border-bottom: 1rpx solid #E0E3DE; border-radius: 0; background: transparent; color: #68777B; display: flex; align-items: center; justify-content: space-between; text-align: left; }
+.menu-title { display: block; color: #36474C; font-size: 29rpx; font-weight: 500; }
+.menu-desc { display: block; font-size: 24rpx; margin-top: 5rpx; }
+.privacy-section, .danger-zone { margin-top: 44rpx; }
+.privacy-note { margin-top: 16rpx; }
+.delete-btn { margin-top: 28rpx; }
+.delete-mask { position: fixed; inset: 0; z-index: 1000; background: rgba(47,58,61,.3); display: flex; align-items: flex-end; }
+.delete-dialog { width: 100%; background: #F7F6F2; border-radius: 30rpx 30rpx 0 0; padding: 38rpx 36rpx calc(38rpx + env(safe-area-inset-bottom)); }
+.delete-warning { display: block; color: #746964; font-size: 27rpx; margin: 24rpx 0 32rpx; }
+.confirm-label { margin-bottom: 16rpx; }
+.delete-actions { margin-top: 30rpx; }

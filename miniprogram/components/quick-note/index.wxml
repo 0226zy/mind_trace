@@ -1,0 +1,74 @@
+<view wx:if="{{visible}}" class="sheet-mask" bindtap="close" catchtouchmove="stopTouch">
+  <view class="sheet" catchtap="stopTouch" role="dialog" aria-label="30 秒速记">
+    <view class="sheet-handle"></view>
+
+    <block wx:if="{{stage === 'edit'}}">
+      <view class="row-between sheet-heading">
+        <view><text class="eyebrow">先登记，不评判</text><view class="h2">30 秒，把念头放在这里</view></view>
+        <button class="close-btn" bindtap="close" aria-label="关闭速记">×</button>
+      </view>
+      <view wx:if="{{restored}}" class="notice restore-note">已恢复上次未提交的速记草稿</view>
+      <scroll-view scroll-y class="form-scroll" enhanced show-scrollbar="{{false}}">
+        <view class="field">
+          <text class="field-label">发生了什么？</text>
+          <textarea class="textarea trigger-input" auto-height maxlength="100" value="{{form.triggerEvent}}" data-field="triggerEvent" bindinput="onInput" placeholder="写下触发这件事的场景" placeholder-class="placeholder" />
+          <view class="char-count">{{form.triggerEvent.length}}/100</view>
+        </view>
+        <view class="field">
+          <text class="field-label">此刻有哪些情绪？<text class="label-light">（可多选）</text></text>
+          <view class="chips emotion-chips">
+            <button wx:for="{{emotionOptions}}" wx:key="name" class="chip {{item.selected ? 'chip-selected' : ''}}" data-emotion="{{item.name}}" bindtap="toggleEmotion" aria-pressed="{{item.selected}}">{{item.name}}</button>
+          </view>
+        </view>
+        <view class="field intensity-field">
+          <view class="row-between"><text class="field-label">情绪强度</text><text class="intensity-value">{{form.intensity}}<text class="intensity-total"> / 10</text></text></view>
+          <slider min="1" max="10" step="1" value="{{form.intensity}}" activeColor="#7E97A6" backgroundColor="#DDE3E1" block-color="#7E97A6" block-size="24" bindchange="onIntensity" aria-label="情绪强度，1 到 10" />
+          <view class="row-between slider-labels"><text>轻微</text><text>强烈</text></view>
+        </view>
+        <view class="field">
+          <text class="field-label">大脑在反复说什么？</text>
+          <text class="field-hint">原话写下，不加修饰</text>
+          <textarea class="textarea thought-input" auto-height maxlength="1000" value="{{form.loopThought}}" data-field="loopThought" bindinput="onInput" placeholder="例如：如果刚才那句话被误解了……" placeholder-class="placeholder" />
+          <view class="char-count">{{form.loopThought.length}}/1000</view>
+        </view>
+        <view wx:if="{{error}}" class="error-text" role="alert">{{error}}</view>
+        <button class="primary-btn full-btn save-btn" bindtap="submit">先记下来</button>
+        <view class="local-hint">内容仅用于你的思虑记录。未提交内容会作为草稿留在本机。</view>
+      </scroll-view>
+    </block>
+
+    <view wx:elif="{{stage === 'matching' || stage === 'saving'}}" class="empty-space processing-state">
+      <view class="calm-pulse"></view>
+      <text class="empty-title">{{stage === 'matching' ? '正在安放这条思虑' : '正在保存'}}</text>
+      <text>不用继续想，交给我们记录。</text>
+    </view>
+
+    <block wx:elif="{{stage === 'match'}}">
+      <view class="sheet-heading"><text class="eyebrow">保存前确认</text><view class="h2">这可能是旧念复发</view></view>
+      <scroll-view scroll-y class="match-scroll">
+        <text class="muted body-small">只会提示，不会自动合并。关联后，后端会带入上一版评估内容供你修改。</text>
+        <view wx:for="{{similarItems}}" wx:key="index" class="similar-card" data-index="{{index}}" bindtap="chooseSimilar" role="button">
+          <view class="row-between"><text class="similar-title wrap">{{item.thought.title || '相似思虑'}}</text><text class="tag">关联为 v{{(item.thought.versionCount || 1) + 1}}</text></view>
+          <text class="list-meta">已登记 {{item.thought.versionCount || 1}} 次 · 相似度 {{item.score <= 1 ? item.score * 100 : item.score}}%</text>
+          <view class="similar-action">关联为新版本，重新走流程 →</view>
+        </view>
+        <view wx:if="{{matchError}}" class="notice notice-warm match-notice">{{matchError}}</view>
+        <view wx:if="{{error}}" class="error-text">{{error}}</view>
+      </scroll-view>
+      <button class="secondary-btn full-btn" bindtap="chooseNew">不关联，作为新思虑</button>
+      <button class="text-btn full-btn" bindtap="resetFeedback">返回修改</button>
+    </block>
+
+    <block wx:else>
+      <view class="success-state">
+        <view class="success-mark">✓</view>
+        <view class="h1">已记录</view>
+        <text class="success-copy">大脑可以暂时放下它了。</text>
+        <view wx:if="{{offlineSaved}}" class="notice notice-warm offline-notice">当前离线，内容已安全保存在本机。联网后会同步；若发送结果不确定，将暂停自动重试并请你确认。</view>
+        <button class="primary-btn full-btn" bindtap="later">稍后处理</button>
+        <button wx:if="{{!offlineSaved}}" class="secondary-btn full-btn" bindtap="evaluateNow">现在评估</button>
+        <button class="text-btn full-btn emergency-link" bindtap="emergency">我需要先叫停</button>
+      </view>
+    </block>
+  </view>
+</view>

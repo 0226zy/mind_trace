@@ -1,0 +1,34 @@
+{
+  "pages": [
+    "pages/now/index",
+    "pages/process/index",
+    "pages/library/index",
+    "pages/evaluate/index",
+    "pages/thought-detail/index",
+    "pages/local-record/index",
+    "pages/emergency/index",
+    "pages/stats/index",
+    "pages/profile/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F7F6F2",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "止念",
+    "backgroundColor": "#F7F6F2",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#7B8588",
+    "selectedColor": "#526F7D",
+    "backgroundColor": "#FBFAF7",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/now/index", "text": "此刻" },
+      { "pagePath": "pages/process/index", "text": "处理" },
+      { "pagePath": "pages/library/index", "text": "思虑库" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

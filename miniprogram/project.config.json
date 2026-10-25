@@ -1,0 +1,25 @@
+{
+  "description": "止念｜原生微信小程序",
+  "appid": "touristappid",
+  "compileType": "miniprogram",
+  "libVersion": "3.8.12",
+  "projectname": "mind-trace",
+  "miniprogramRoot": "./",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "coverView": true,
+    "ignoreUploadUnusedFiles": false
+  },
+  "packOptions": {
+    "ignore": [
+      { "type": "folder", "value": "tests" },
+      { "type": "folder", "value": "scripts" },
+      { "type": "folder", "value": ".artifacts" },
+      { "type": "file", "value": "README.md" }
+    ]
+  }
+}

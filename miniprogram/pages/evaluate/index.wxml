@@ -1,0 +1,91 @@
+<view class="page evaluate-page">
+  <state-view loading="{{loading}}" error="{{error}}" bind:retry="loadRecord" />
+
+  <block wx:if="{{!loading && !error && !completed && !breathing}}">
+    <view class="evaluate-header">
+      <text class="eyebrow">{{readOnly ? '已收尾记录' : '一次只处理一步'}}</text>
+      <view class="h1">{{readOnly ? '处理结果' : stepTitles[step - 1]}}</view>
+      <text wx:if="{{!readOnly}}" class="list-meta">第 {{step}} 步 / 共 7 步</text>
+      <view wx:if="{{!readOnly}}" class="progress-track"><view class="progress-fill" style="width: {{step / 7 * 100}}%"></view></view>
+      <text wx:if="{{record.inheritedFrom}}" class="inherit-note">已从上一版带入评估内容，你可以按这次的情况修改。</text>
+      <text wx:if="{{restored}}" class="inherit-note">已恢复本机草稿，从上次的位置继续。</text>
+    </view>
+
+    <block wx:if="{{!readOnly}}">
+      <view wx:if="{{step === 1}}" class="step-body">
+        <view class="question">这是有效推演，还是无效反刍？</view>
+        <text class="guidance">想一想：这是第几遍想？有没有新信息？</text>
+        <button class="choice-card {{form.ruminationType === '有效推演' ? 'choice-selected' : ''}}" data-value="有效推演" bindtap="chooseType"><text class="choice-title">有效推演</text><text>有新信息，能推动一个具体决定</text></button>
+        <button class="choice-card {{form.ruminationType === '无效反刍' ? 'choice-selected' : ''}}" data-value="无效反刍" bindtap="chooseType"><text class="choice-title">无效反刍</text><text>重复同一圈，没有新增信息或行动</text></button>
+      </view>
+
+      <view wx:elif="{{step === 2}}" class="step-body">
+        <view class="question">我具体担心什么会出错？</view>
+        <text class="guidance">写得越具体，越容易分清可控与不可控。</text>
+        <textarea class="textarea large-textarea" auto-height value="{{form.riskContent}}" data-field="riskContent" bindinput="onInput" placeholder="例如：汇报时数据口径被质疑，影响方案通过……" />
+      </view>
+
+      <view wx:elif="{{step === 3}}" class="step-body">
+        <view class="question">这件事实际发生的概率有多大？</view>
+        <view class="probability-value">{{form.probability}}<text>%</text></view>
+        <slider min="0" max="100" step="1" value="{{form.probability}}" activeColor="#7E97A6" backgroundColor="#DDE3E1" block-color="#7E97A6" block-size="26" bindchange="onProbability" aria-label="发生概率，0 到 100" />
+        <view class="row-between slider-labels"><text>0% 不会发生</text><text>100% 必然发生</text></view>
+        <view wx:if="{{form.probability < 20}}" class="notice low-probability">低概率提醒：担心很真实，但它并不等于事实。</view>
+      </view>
+
+      <view wx:elif="{{step === 4}}" class="step-body">
+        <view class="question">可控的部分，我能做什么？</view>
+        <text class="guidance">每行一项，写成可以执行的具体动作。完成后可逐项勾选。</text>
+        <textarea class="textarea large-textarea" auto-height value="{{form.actionsText}}" data-field="actionsText" bindinput="onInput" placeholder="例如：今晚核对三个数据口径&#10;明天请同事预演一次提问" />
+        <view class="action-list" wx:if="{{actionItems.length}}">
+          <button wx:for="{{actionItems}}" wx:key="index" class="action-item" data-index="{{item.index}}" bindtap="toggleAction"><text class="check-box {{item.done ? 'checked' : ''}}">{{item.done ? '✓' : ''}}</text><text class="{{item.done ? 'strikethrough' : ''}} wrap">{{item.text}}</text></button>
+        </view>
+      </view>
+
+      <view wx:elif="{{step === 5}}" class="step-body">
+        <view class="question">哪些部分超出我的控制？</view>
+        <text class="guidance">每行一项。写完后，点一下把它划掉——不再脑补。</text>
+        <textarea class="textarea large-textarea" auto-height value="{{form.uncontrollableText}}" data-field="uncontrollableText" bindinput="onInput" placeholder="例如：别人最终如何评价我&#10;会议当天的临时变化" />
+        <view class="cross-list" wx:if="{{uncontrollableItems.length}}">
+          <button wx:for="{{uncontrollableItems}}" wx:key="index" class="cross-item {{item.crossedOut ? 'crossed' : ''}}" data-index="{{item.index}}" bindtap="toggleCrossed"><text class="cross-mark">{{item.crossedOut ? '✓' : '○'}}</text><text class="{{item.crossedOut ? 'strikethrough' : ''}} wrap">{{item.text}}</text><text class="cross-hint">{{item.crossedOut ? '已放下' : '划掉'}}</text></button>
+        </view>
+      </view>
+
+      <view wx:elif="{{step === 6}}" class="step-body">
+        <view class="question">给自己三种平衡视角</view>
+        <text class="guidance">不强迫自己乐观，只把可能性看完整。</text>
+        <view class="field scenario-field"><text class="field-label">最坏可能</text><textarea class="textarea" auto-height value="{{form.scenarioWorst}}" data-field="scenarioWorst" bindinput="onInput" placeholder="如果最担心的事发生，会怎样？" /></view>
+        <view class="field scenario-field"><text class="field-label">最可能</text><textarea class="textarea" auto-height value="{{form.scenarioLikely}}" data-field="scenarioLikely" bindinput="onInput" placeholder="结合已有信息，最平常的结果是什么？" /></view>
+        <view class="field scenario-field"><text class="field-label">最好可能</text><textarea class="textarea" auto-height value="{{form.scenarioBest}}" data-field="scenarioBest" bindinput="onInput" placeholder="也可能出现什么好的结果？" /></view>
+      </view>
+
+      <view wx:else class="step-body">
+        <view class="question">做完这三项，就结束这一轮</view>
+        <text class="guidance">逐项确认，不带着模糊感离开。</text>
+        <view class="confirmation-list">
+          <button wx:for="{{confirmations}}" wx:key="index" class="confirmation-item {{form.closeConfirmations[index] ? 'confirmation-done' : ''}}" data-index="{{index}}" bindtap="toggleConfirmation"><text class="confirmation-number">{{form.closeConfirmations[index] ? '✓' : index + 1}}</text><text class="wrap">{{item}}</text></button>
+        </view>
+      </view>
+
+      <view wx:if="{{stepError}}" class="error-text step-error" role="alert">{{stepError}}</view>
+      <view class="save-state">{{saveState}}</view>
+      <view class="evaluate-actions">
+        <button class="quiet-btn" bindtap="previous">上一步</button>
+        <button class="primary-btn" bindtap="next" disabled="{{closing}}">{{step === 7 ? (closing ? '正在收尾…' : '此刻结束，回到当下') : '下一步'}}</button>
+      </view>
+      <view class="minor-actions"><button class="text-btn" bindtap="saveAndExit">暂存并离开</button><button class="text-btn" bindtap="pauseRecord">暂时搁置</button></view>
+    </block>
+
+    <block wx:else>
+      <view class="card readonly-card"><text class="field-label">推演判断</text><text>{{form.ruminationType || '未填写'}}</text></view>
+      <view class="card readonly-card"><text class="field-label">风险与概率</text><view class="wrap">{{form.riskContent}}</view><text class="tag probability-tag">{{form.probability}}%</text></view>
+      <view class="card readonly-card"><text class="field-label">可控行动</text><view wx:for="{{actionItems}}" wx:key="index" class="readonly-line {{item.done ? 'strikethrough' : ''}}">{{item.done ? '✓' : '○'}} {{item.text}}</view></view>
+      <view class="card readonly-card"><text class="field-label">不可控内容</text><view wx:for="{{uncontrollableItems}}" wx:key="index" class="readonly-line {{item.crossedOut ? 'strikethrough' : ''}}">{{item.crossedOut ? '✓' : '○'}} {{item.text}}</view></view>
+      <view class="card readonly-card"><text class="field-label">三种视角</text><view class="scenario-read"><text>最坏</text><view class="wrap">{{form.scenarioWorst}}</view></view><view class="scenario-read"><text>最可能</text><view class="wrap">{{form.scenarioLikely}}</view></view><view class="scenario-read"><text>最好</text><view class="wrap">{{form.scenarioBest}}</view></view></view>
+      <button class="primary-btn full-btn" bindtap="back">返回</button>
+    </block>
+  </block>
+
+  <view wx:if="{{breathing}}" class="completion-view"><view class="breath-circle"><text>呼吸</text></view><view class="h1">此刻结束</view><text>慢慢吸气，再慢慢呼气</text></view>
+  <view wx:if="{{completed}}" class="completion-view"><view class="success-mark">✓</view><view class="h1">回到当下</view><text class="completion-copy">这一轮思虑已经处理完，不必再给它更多时间。</text><button class="primary-btn full-btn" bindtap="goProcess">返回处理队列</button><button class="secondary-btn full-btn" bindtap="goLibrary">去思虑库看看</button></view>
+</view>

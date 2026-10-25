@@ -1,0 +1,5 @@
+.local-title { margin: 12rpx 0 34rpx; font-size: 40rpx; }
+.local-field { margin-top: 26rpx; }
+.local-notice { margin: 24rpx 0; }
+.local-action { margin-bottom: 18rpx; }
+.id-note { color: #8B9495; font-size: 21rpx; margin-top: 26rpx; word-break: break-all; }

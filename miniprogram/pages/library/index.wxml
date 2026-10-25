@@ -1,0 +1,24 @@
+<view class="page page-with-tab library-page">
+  <view class="header"><view class="header-copy"><text class="eyebrow">看见反复出现的模式</text><view class="h1">思虑库</view></view><button class="icon-text-btn stats-btn" bindtap="goStats">统计</button></view>
+  <view class="search-row"><view class="search-box"><text class="search-symbol">⌕</text><input value="{{query}}" bindinput="onQuery" bindconfirm="search" confirm-type="search" placeholder="搜索触发事件、念头或风险" placeholder-class="placeholder" /><button wx:if="{{query}}" class="clear-search" bindtap="clearSearch">×</button></view><button class="filter-btn {{filtersVisible ? 'filter-active' : ''}}" bindtap="toggleFilters">筛选</button></view>
+  <view wx:if="{{filtersVisible}}" class="filters card">
+    <text class="field-label">状态</text><view class="chips filter-chips"><button wx:for="{{statuses}}" wx:key="value" class="chip {{status === item.value ? 'chip-selected' : ''}}" data-value="{{item.value}}" bindtap="setStatus">{{item.label}}</button></view>
+    <text class="field-label filter-label">情绪</text><view class="chips filter-chips"><button wx:for="{{emotions}}" wx:key="*this" class="chip {{emotion === item ? 'chip-selected' : ''}}" data-value="{{item}}" bindtap="setEmotion">{{item}}</button></view>
+    <text class="field-label filter-label">最近登记</text><view class="chips filter-chips"><button wx:for="{{times}}" wx:key="value" class="chip {{timeRange === item.value ? 'chip-selected' : ''}}" data-value="{{item.value}}" bindtap="setTime">{{item.label}}</button></view>
+    <button class="frequency-filter {{frequentOnly ? 'frequency-active' : ''}}" bindtap="toggleFrequent"><text>{{frequentOnly ? '✓' : '○'}}</text> 只看高频思绪（3 次及以上）</button>
+    <button class="text-btn reset-btn" bindtap="resetFilters">清空全部筛选</button>
+  </view>
+  <view class="row-between result-meta"><text class="list-meta">{{visibleItems.length}} 个思虑点</text><text class="list-meta">按最近登记排序</text></view>
+  <state-view loading="{{loading}}" error="{{error}}" empty="{{!loading && !error && !visibleItems.length}}" empty-title="没有找到相符的思虑" empty-text="可以换个关键词或清空筛选。每一次登记都会在这里留下版本。" bind:retry="load" />
+  <view wx:if="{{!loading && !error}}">
+    <view class="card thought-card" wx:for="{{visibleItems}}" wx:key="id" data-id="{{item.id}}" bindtap="openThought" role="button">
+      <view class="row-between"><view class="row thought-tags"><text class="tag {{item.status === 'resolved' ? 'tag-neutral' : ''}}">{{item.statusText}}</text><text wx:if="{{item.versionCount >= 3}}" class="tag tag-warm">高频思绪</text></view><text class="list-meta">{{item.versionCount}} 次</text></view>
+      <view class="thought-title wrap">{{item.title}}</view>
+      <view wx:if="{{item.emotionsText}}" class="emotion-line">{{item.emotionsText}}</view>
+      <view class="row-between"><text class="list-meta">最近 {{item.lastRecordAtText}}</text><text class="open-text">{{item.currentStatusText || '查看时间线'}} →</text></view>
+      <view wx:if="{{item.currentStatus && item.currentStatus !== 'closed'}}" class="progress-track"><view class="progress-fill" style="width: {{item.currentStep / 7 * 100}}%"></view></view>
+    </view>
+    <button wx:if="{{items.length < total}}" class="quiet-btn full-btn load-more" bindtap="loadMore" disabled="{{loadingMore}}">{{loadingMore ? '正在加载…' : '加载更多'}}</button>
+    <view wx:if="{{loadingMore}}" class="list-meta loading-more">正在加载更多…</view>
+  </view>
+</view>

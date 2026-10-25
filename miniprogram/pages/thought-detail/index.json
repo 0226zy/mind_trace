@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "思虑详情",
+  "usingComponents": { "state-view": "/components/state-view/index" }
+}

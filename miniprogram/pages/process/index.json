@@ -1,0 +1,5 @@
+{
+  "navigationBarTitleText": "处理",
+  "enablePullDownRefresh": true,
+  "usingComponents": { "state-view": "/components/state-view/index" }
+}

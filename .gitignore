@@ -1,0 +1,25 @@
+# Secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+*.key
+*.pem
+
+# Dependencies and builds
+node_modules/
+dist/
+artifacts/
+.artifacts/
+server/bin/
+server/server
+*.test
+*.out
+
+# Local/editor/OS
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.tmp
+coverage/

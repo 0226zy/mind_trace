@@ -1,0 +1,24 @@
+.stats-btn { border-radius: 22rpx; width: 96rpx; }
+.search-row { display: flex; gap: 16rpx; margin-bottom: 24rpx; }
+.search-box { flex: 1; min-width: 0; min-height: 88rpx; display: flex; align-items: center; background: #FCFBF8; border: 1rpx solid #DDE1DE; border-radius: 20rpx; padding: 0 20rpx; }
+.search-symbol { font-size: 38rpx; color: #7A898D; margin-right: 12rpx; }
+.search-box input { flex: 1; min-width: 0; font-size: 26rpx; height: 88rpx; }
+.placeholder { color: #9AA2A3; }
+.clear-search { width: 64rpx; height: 64rpx; background: transparent; color: #7E898C; padding: 0; font-size: 36rpx; }
+.filter-btn { width: 108rpx; min-height: 88rpx; border-radius: 20rpx; background: #E8EEF0; color: #526F7D; font-size: 27rpx; }
+.filter-active { background: #D6E2E6; }
+.filter-chips { gap: 12rpx; }
+.filter-chips .chip { min-height: 68rpx; min-width: 0; font-size: 25rpx; padding: 12rpx 20rpx; }
+.filter-label { margin-top: 26rpx; }
+.frequency-filter { width: 100%; min-height: 88rpx; background: transparent; color: #647478; padding: 20rpx 0; text-align: left; font-size: 26rpx; }
+.frequency-active { color: #405E6C; }
+.reset-btn { margin-left: auto; display: flex; }
+.result-meta { margin: 26rpx 4rpx 18rpx; }
+.thought-card { margin-bottom: 20rpx; }
+.thought-tags { gap: 10rpx; }
+.thought-title { font-size: 32rpx; font-weight: 600; margin: 22rpx 0; }
+.emotion-line { color: #7B898D; font-size: 24rpx; margin-bottom: 20rpx; }
+.open-text { color: #526F7D; font-size: 24rpx; }
+.thought-card .progress-track { margin-top: 20rpx; }
+.load-more { margin-top: 24rpx; }
+.loading-more { text-align: center; padding: 24rpx; }

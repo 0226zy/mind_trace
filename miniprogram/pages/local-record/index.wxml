@@ -1,0 +1,14 @@
+<view class="page">
+  <block wx:if="{{item}}">
+    <text class="eyebrow">仅保存在本机的登记</text><view class="h1 local-title wrap">{{item.payload.triggerEvent}}</view>
+    <view class="card"><view class="row-between"><text class="tag tag-warm">{{item.syncStateText}}</text><text class="list-meta">{{item.createdAtText}}</text></view><view class="local-field"><text class="field-label">情绪与强度</text><text>{{item.emotionsText}} · {{item.payload.intensity}}/10</text></view><view class="local-field"><text class="field-label">循环念头</text><text class="wrap">{{item.payload.loopThought}}</text></view></view>
+    <view wx:if="{{item.syncState === 'uncertain'}}" class="notice notice-warm local-notice">上次请求可能已到达服务端。自动同步已暂停，请先到思虑库确认，避免重复提交。</view>
+    <view wx:if="{{item.blockReason === 'accountChanged'}}" class="notice notice-warm local-notice">当前已是另一个内部用户账号。这条旧记录已停止同步并保留在本机，绝不会写入新账号。</view>
+    <view wx:if="{{item.errorMessage || error}}" class="error-text local-notice">{{error || item.errorMessage}}</view>
+    <button class="primary-btn full-btn local-action" bindtap="retrySync" disabled="{{syncing || !item.canRetry}}">{{syncing ? '正在同步…' : !item.canRetry ? '账号已变化，禁止同步' : item.syncState === 'uncertain' ? '确认后重试同步' : '同步这条登记'}}</button>
+    <button class="danger-btn full-btn" bindtap="removeLocal">删除本机登记</button>
+    <view class="id-note wrap">幂等标识：{{item.clientRequestId}}</view>
+  </block>
+  <block wx:elif="{{syncedRecord}}"><view class="empty-space"><text class="empty-title">已同步到思虑库</text><text>本地待同步副本已移除。</text></view><button class="primary-btn full-btn" bindtap="evaluate">现在评估</button></block>
+  <view wx:else class="empty-space"><text class="empty-title">这条本地登记已不存在</text><text>它可能已完成同步。</text></view>
+</view>

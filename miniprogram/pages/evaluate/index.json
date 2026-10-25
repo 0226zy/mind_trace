@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "七步评估",
+  "usingComponents": { "state-view": "/components/state-view/index" }
+}

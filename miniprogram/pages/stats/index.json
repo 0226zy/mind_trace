@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "统计洞察",
+  "usingComponents": { "state-view": "/components/state-view/index" }
+}

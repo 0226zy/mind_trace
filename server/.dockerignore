@@ -1,0 +1,6 @@
+.git
+.env
+server
+*.test
+coverage.out
+README.md

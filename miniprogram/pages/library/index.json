@@ -1,0 +1,5 @@
+{
+  "navigationBarTitleText": "思虑库",
+  "enablePullDownRefresh": true,
+  "usingComponents": { "state-view": "/components/state-view/index" }
+}

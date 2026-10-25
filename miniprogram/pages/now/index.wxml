@@ -1,0 +1,30 @@
+<view class="page page-with-tab now-page">
+  <view class="header">
+    <view class="header-copy"><text class="eyebrow">止念</text><view class="h1">先让念头停下来</view></view>
+    <button class="icon-text-btn" bindtap="goProfile" aria-label="我的与数据设置">我的</button>
+  </view>
+
+  <view class="breathing-space">
+    <text class="now-note">不必现在想明白</text>
+    <button class="capture-btn" bindtap="openQuick">
+      <text class="capture-title">我陷入了一个思虑</text>
+      <text class="capture-subtitle">用 30 秒先记下来</text>
+    </button>
+    <text class="privacy-note">只记录，不评判。稍后再处理也可以。</text>
+  </view>
+
+  <view class="now-summary">
+    <state-view loading="{{loading}}" error="{{error}}" bind:retry="loadDashboard" />
+    <block wx:if="{{loaded && !error}}">
+      <view class="summary-line"><text>今日已登记</text><text class="summary-number">{{dashboard.todayCount || 0}} 条</text></view>
+      <view class="summary-line"><text>等待处理</text><text class="summary-number">{{dashboard.pendingCount || 0}} 条</text></view>
+      <button wx:if="{{dashboard.pendingCount}}" class="text-btn process-link" bindtap="goProcess">平静时，去处理队列 →</button>
+    </block>
+  </view>
+
+  <view class="emergency-entry">
+    <view><view class="section-title">脑子停不下来？</view><text class="muted body-small">用 5 分钟感官落地，把注意力带回此刻。</text></view>
+    <button class="quiet-btn emergency-btn" bindtap="goEmergency">应急叫停</button>
+  </view>
+</view>
+<quick-note id="quick-note" visible="{{quickVisible}}" bind:close="closeQuick" bind:saved="onSaved" bind:evaluate="evaluateNow" bind:emergency="goEmergency" />

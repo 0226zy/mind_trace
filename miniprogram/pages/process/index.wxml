@@ -1,0 +1,29 @@
+<view class="page page-with-tab">
+  <view class="header"><view class="header-copy"><text class="eyebrow">在平静时处理</text><view class="h1">把思绪变成决定</view></view></view>
+
+  <view wx:if="{{offlineItems.length}}" class="offline-panel">
+    <view class="row-between"><view><view class="offline-title">本机待同步 · {{offlineItems.length}}</view><text class="list-meta">登记已保存在本机，不会因断网丢失</text></view><button class="text-btn" bindtap="syncNow" disabled="{{syncing}}">{{syncing ? '检查中' : '立即同步'}}</button></view>
+    <view wx:if="{{hasBlockedAccountChange}}" class="notice notice-warm account-warning">检测到账号变化。旧账号的本地记录已停止同步并完整保留，不会写入新账号。</view>
+    <view class="local-item" wx:for="{{offlineItems}}" wx:key="clientRequestId" data-id="{{item.clientRequestId}}" bindtap="openLocal">
+      <view class="row-between"><text class="local-item-title wrap">{{item.triggerEvent}}</text><text class="tag {{item.syncState === 'uncertain' || item.syncState === 'failed' || item.syncState === 'blocked' ? 'tag-warm' : 'tag-neutral'}}">{{item.syncStateText}}</text></view>
+      <text class="list-meta">强度 {{item.intensity}} · {{item.createdAtText}}</text>
+    </view>
+  </view>
+
+  <view class="segmented">
+    <button class="segment {{tab === 'pending' ? 'segment-active' : ''}}" data-tab="pending" bindtap="changeTab">待处理</button>
+    <button class="segment {{tab === 'closed' ? 'segment-active' : ''}}" data-tab="closed" bindtap="changeTab">已收尾</button>
+  </view>
+
+  <state-view loading="{{loading}}" error="{{error}}" empty="{{!loading && !error && !visibleRecords.length}}" empty-title="{{tab === 'pending' ? '没有等待处理的思虑' : '还没有已收尾的记录'}}" empty-text="{{tab === 'pending' ? '此刻不需要做什么，安心回到当下。' : '完成七步评估后，记录会收在这里。'}}" bind:retry="load" />
+
+  <view wx:if="{{!loading && !error}}" class="record-list">
+    <view class="card record-card" wx:for="{{visibleRecords}}" wx:key="id" data-id="{{item.id}}" bindtap="openRecord" role="button">
+      <view class="row-between"><text class="tag {{item.status === 'closed' ? 'tag-neutral' : ''}}">{{item.statusText}}</text><text class="list-meta">v{{item.versionNo || 1}}</text></view>
+      <view class="record-trigger wrap">{{item.triggerEvent}}</view>
+      <view class="record-thought wrap">{{item.loopThought}}</view>
+      <view class="row-between record-footer"><text class="list-meta">强度 {{item.intensity}} · {{item.updatedAtText}}</text><text class="open-text">{{tab === 'pending' ? (item.step ? '继续第 ' + item.step + ' 步' : '开始评估') : '查看记录'}} →</text></view>
+      <view wx:if="{{tab === 'pending'}}" class="progress-track"><view class="progress-fill" style="width: {{item.step / 7 * 100}}%"></view></view>
+    </view>
+  </view>
+</view>

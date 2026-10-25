@@ -1,0 +1,11 @@
+<view class="page stats-page">
+  <view class="header"><view class="header-copy"><text class="eyebrow">复盘，而不是自我评判</text><view class="h1">统计洞察</view></view></view>
+  <state-view loading="{{loading}}" error="{{error}}" empty="{{!loading && !error && stats && !stats.totalRecords}}" empty-title="还没有足够的数据" empty-text="完成几次登记与评估后，这里会呈现你的思虑模式。" bind:retry="load" />
+  <block wx:if="{{!loading && !error && stats && stats.totalRecords}}">
+    <view class="metric-grid"><view class="metric"><text class="metric-value">{{stats.totalThoughts || 0}}</text><text class="metric-label">思虑点</text></view><view class="metric"><text class="metric-value">{{stats.totalRecords || 0}}</text><text class="metric-label">登记版本</text></view><view class="metric"><text class="metric-value">{{completionRate}}</text><text class="metric-label">处理完成率</text></view><view class="metric"><text class="metric-value">{{recurringCount}}</text><text class="metric-label">高频主题</text></view></view>
+    <view class="stats-section"><view class="section-title">情绪出现次数</view><view wx:if="{{emotions.length}}" class="card"><view class="emotion-row" wx:for="{{emotions}}" wx:key="name"><view class="row-between"><text>{{item.name}}</text><text class="list-meta">{{item.count}} 次</text></view><view class="emotion-track"><view class="emotion-fill" style="width: {{item.width}}%"></view></view></view></view><view wx:else class="notice">暂无情绪标签数据。</view></view>
+    <view class="stats-section"><view class="section-title">情绪强度趋势</view><view wx:if="{{trend.length}}" class="card trend-card"><view class="trend-chart"><view class="trend-column" wx:for="{{trend}}" wx:key="index"><text class="trend-value">{{item.value}}</text><view class="trend-bar-wrap"><view class="trend-bar" style="height: {{item.height}}%"></view></view><text class="trend-label">{{item.label}}</text></view></view><text class="chart-note">每点为该时段平均强度，满值 10</text></view><view wx:else class="notice">暂无强度趋势数据。</view></view>
+    <view wx:if="{{recurringCount}}" class="notice insight">有 {{recurringCount}} 个主题反复出现。比起责备自己“又想了一遍”，更值得看看它们是否指向同一个需要行动或放下的领域。</view>
+    <view class="stats-footnote">统计用于自我观察，不构成任何医疗或心理诊断。</view>
+  </block>
+</view>

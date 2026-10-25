@@ -1,0 +1,25 @@
+.emergency-page { padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); }
+.tool-tabs { display: flex; gap: 8rpx; padding: 6rpx; border-radius: 18rpx; background: #E9EBE7; margin-bottom: 40rpx; }
+.tool-tab { flex: 1; min-width: 0; min-height: 80rpx; border-radius: 14rpx; background: transparent; color: #6D797C; font-size: 24rpx; padding: 10rpx 6rpx; }
+.tool-active { background: #FCFBF8; color: #40565E; font-weight: 600; }
+.sense-panel { padding-top: 16rpx; }
+.sense-title { margin: 12rpx 0; font-size: 40rpx; }
+.guidance-text { display: block; color: #788588; font-size: 26rpx; margin-bottom: 36rpx; }
+.sense-input { display: flex; align-items: center; gap: 20rpx; min-height: 96rpx; background: #FCFBF8; border: 1rpx solid #DDE1DE; border-radius: 18rpx; padding: 0 24rpx; margin-bottom: 18rpx; }
+.sense-index { color: #7E97A6; font-size: 26rpx; }
+.sense-input input { flex: 1; height: 94rpx; font-size: 28rpx; }
+.placeholder { color: #A0A7A8; }
+.sense-error { margin-top: 24rpx; }
+.sense-actions { margin-top: 34rpx; }
+.sense-complete, .phrase-panel, .timer-panel { min-height: 650rpx; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.complete-symbol { width: 88rpx; height: 88rpx; border-radius: 50%; background: #DFE8E7; color: #55736F; display: flex; align-items: center; justify-content: center; margin: 0 auto 30rpx; font-size: 46rpx; }
+.sense-complete .muted { margin-top: 20rpx; }
+.complete-actions { margin-top: 60rpx; }
+.phrase { font-size: 60rpx; font-weight: 500; line-height: 1.65; color: #40565E; margin: 54rpx 0 34rpx; }
+.phrase-note, .timer-note { color: #758286; font-size: 26rpx; margin-bottom: 54rpx; }
+.timer-title { margin: 16rpx 0 20rpx; }
+.timer-clock { font-size: 108rpx; font-weight: 300; color: #526F7D; font-variant-numeric: tabular-nums; letter-spacing: 6rpx; padding: 40rpx 0; }
+.timer-running { animation: quietPulse 3s ease-in-out infinite; }
+.timer-complete { margin-bottom: 28rpx; text-align: left; }
+.timer-btn { margin-bottom: 12rpx; }
+@keyframes quietPulse { 0%,100% { opacity: .72; } 50% { opacity: 1; } }

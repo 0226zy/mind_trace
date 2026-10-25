@@ -1,0 +1,4 @@
+{
+  "navigationBarTitleText": "止念",
+  "usingComponents": { "quick-note": "/components/quick-note/index", "state-view": "/components/state-view/index" }
+}

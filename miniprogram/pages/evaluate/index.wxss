@@ -1,0 +1,44 @@
+.evaluate-page { padding-bottom: calc(56rpx + env(safe-area-inset-bottom)); }
+.evaluate-header { margin-bottom: 44rpx; }
+.evaluate-header .progress-track { margin-top: 20rpx; }
+.inherit-note { display: block; color: #60746F; background: #E9EEE9; border-radius: 14rpx; padding: 16rpx 20rpx; margin-top: 20rpx; font-size: 24rpx; }
+.step-body { min-height: 520rpx; }
+.question { font-size: 36rpx; line-height: 1.5; font-weight: 600; margin-bottom: 12rpx; }
+.guidance { display: block; color: #778387; font-size: 26rpx; margin-bottom: 32rpx; }
+.choice-card { width: 100%; min-height: 156rpx; padding: 28rpx; margin-bottom: 20rpx; border-radius: 22rpx; background: #FCFBF8; border: 1rpx solid #DDE1DE; color: #667478; text-align: left; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; font-size: 25rpx; }
+.choice-title { color: #34464C; font-size: 32rpx; font-weight: 600; margin-bottom: 8rpx; }
+.choice-selected { background: #E5ECEE; border-color: #8DA4AF; }
+.large-textarea { min-height: 260rpx; }
+.probability-value { color: #526F7D; text-align: center; font-size: 88rpx; font-weight: 500; padding: 50rpx 0 30rpx; }
+.probability-value text { font-size: 32rpx; margin-left: 6rpx; }
+.slider-labels { color: #899194; font-size: 22rpx; }
+.low-probability { margin-top: 48rpx; }
+.action-list, .cross-list { margin-top: 24rpx; }
+.action-item, .cross-item { width: 100%; min-height: 88rpx; padding: 20rpx 8rpx; border-bottom: 1rpx solid #E1E4DF; border-radius: 0; background: transparent; display: flex; align-items: center; gap: 18rpx; text-align: left; color: #425156; font-size: 27rpx; }
+.check-box { width: 42rpx; height: 42rpx; border: 2rpx solid #9BA9AC; border-radius: 8rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.checked { background: #7E97A6; color: #FFFFFF; border-color: #7E97A6; }
+.cross-item { background: #FCFBF8; border: 1rpx solid #DDE1DE; border-radius: 16rpx; padding: 22rpx; margin-top: 14rpx; }
+.cross-item.crossed { background: #F0F0EB; }
+.cross-mark { color: #6E8792; flex-shrink: 0; }
+.cross-hint { margin-left: auto; color: #7B898D; font-size: 23rpx; flex-shrink: 0; }
+.scenario-field { margin-top: 28rpx; }
+.confirmation-item { width: 100%; min-height: 140rpx; padding: 26rpx; margin-bottom: 20rpx; border-radius: 20rpx; border: 1rpx solid #DDE1DE; background: #FCFBF8; display: flex; align-items: center; gap: 24rpx; text-align: left; color: #435156; font-size: 28rpx; line-height: 1.6; }
+.confirmation-number { width: 52rpx; height: 52rpx; border-radius: 50%; border: 1rpx solid #9BA9AC; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #718187; }
+.confirmation-done { background: #E6ECE8; border-color: #A3B4AA; }
+.confirmation-done .confirmation-number { background: #7E97A6; border-color: #7E97A6; color: #FFFFFF; }
+.step-error { margin-top: 24rpx; }
+.save-state { min-height: 44rpx; text-align: center; color: #899194; font-size: 23rpx; }
+.evaluate-actions { display: flex; gap: 18rpx; margin-top: 18rpx; }
+.evaluate-actions button { flex: 1; }
+.evaluate-actions .primary-btn { flex: 1.7; }
+.minor-actions { display: flex; justify-content: center; gap: 40rpx; }
+.readonly-card { margin-bottom: 20rpx; }
+.probability-tag { margin-top: 18rpx; }
+.readonly-line { padding: 12rpx 0; overflow-wrap: anywhere; }
+.scenario-read { margin-top: 20rpx; }
+.scenario-read > text { display: block; color: #7B8588; font-size: 24rpx; margin-bottom: 6rpx; }
+.completion-view { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 24rpx; color: #69777B; }
+.breath-circle { width: 230rpx; height: 230rpx; border-radius: 50%; background: #DCE6E8; color: #526F7D; display: flex; align-items: center; justify-content: center; margin-bottom: 34rpx; animation: breathing 3s ease-in-out infinite; }
+.success-mark { width: 96rpx; height: 96rpx; border-radius: 50%; background: #DFE8E7; color: #55736F; display: flex; align-items: center; justify-content: center; font-size: 52rpx; }
+.completion-copy { margin-bottom: 32rpx; }
+@keyframes breathing { 0%,100% { transform: scale(.72); opacity: .55; } 50% { transform: scale(1); opacity: 1; } }

@@ -1,0 +1,68 @@
+name: mind_trace
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: mind_trace
+      MYSQL_USER: mindtrace
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [private]
+
+  server:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      APP_ENV: production
+      PORT: 8080
+      MYSQL_DSN: mindtrace:${MYSQL_PASSWORD}@tcp(mysql:3306)/mind_trace?charset=utf8mb4&parseTime=True&loc=Local
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_TTL_HOURS: 168
+      AUTH_DEV_MODE: "false"
+      WECHAT_APP_ID: ${WECHAT_APP_ID}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [private]
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_BASE_URL: /api/v1
+    restart: unless-stopped
+    environment:
+      API_PROXY_TARGET: http://server:8080
+    ports:
+      - "8081:80"
+    depends_on:
+      - server
+    networks: [private]
+
+volumes:
+  mysql_data:
+
+networks:
+  private:
+    driver: bridge

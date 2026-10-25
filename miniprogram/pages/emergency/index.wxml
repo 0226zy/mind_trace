@@ -1,0 +1,31 @@
+<view class="page emergency-page">
+  <view class="header"><view class="header-copy"><text class="eyebrow">先照顾此刻的自己</text><view class="h1">应急叫停</view><text class="muted body-small">不必解决思虑，只把注意力带回身体。</text></view></view>
+  <view class="tool-tabs">
+    <button class="tool-tab {{tool === 'senses' ? 'tool-active' : ''}}" data-tool="senses" bindtap="switchTool">5-4-3 感官</button>
+    <button class="tool-tab {{tool === 'phrase' ? 'tool-active' : ''}}" data-tool="phrase" bindtap="switchTool">一句打断</button>
+    <button class="tool-tab {{tool === 'timer' ? 'tool-active' : ''}}" data-tool="timer" bindtap="switchTool">5 分钟抽离</button>
+  </view>
+
+  <block wx:if="{{tool === 'senses'}}">
+    <view wx:if="{{!sensesDone}}" class="sense-panel">
+      <text class="eyebrow">第 {{senseStep + 1}} 步 / 共 3 步</text>
+      <view class="h2 sense-title">{{sensePrompts[senseStep].title}}</view>
+      <text class="guidance-text">{{sensePrompts[senseStep].hint}}</text>
+      <view class="sense-input" wx:for="{{sensePrompts[senseStep].count}}" wx:key="index">
+        <text class="sense-index">{{index + 1}}</text>
+        <input value="{{senseValues[senseStep][index]}}" data-index="{{index}}" bindinput="onSenseInput" placeholder="{{sensePrompts[senseStep].placeholders[index]}}" placeholder-class="placeholder" />
+      </view>
+      <view wx:if="{{senseError}}" class="error-text sense-error">{{senseError}}</view>
+      <view class="button-row sense-actions"><button wx:if="{{senseStep > 0}}" class="quiet-btn" bindtap="previousSense">上一步</button><button class="primary-btn" bindtap="nextSense">{{senseStep === 2 ? '完成感官落地' : '下一步'}}</button></view>
+    </view>
+    <view wx:else class="sense-complete"><view class="complete-symbol">✓</view><view class="h2">你已经回到此刻</view><text class="muted">注意双脚踩在地面的感觉，再决定下一步。</text><view class="button-row complete-actions"><button class="quiet-btn" bindtap="resetSenses">再做一次</button><button class="primary-btn" bindtap="done">结束叫停</button></view></view>
+  </block>
+
+  <block wx:elif="{{tool === 'phrase'}}">
+    <view class="phrase-panel"><text class="eyebrow">轻轻对自己复述</text><view class="phrase"><view>这是想法，</view><view>不是事实。</view></view><text class="phrase-note">想法可以被看见，但不必立刻被相信或解决。</text><button class="primary-btn full-btn" bindtap="repeatPhrase">{{phraseRepeated ? '我已复述一遍 ✓' : '我已对自己复述一遍'}}</button><button wx:if="{{phraseRepeated}}" class="text-btn full-btn" bindtap="done">现在感觉稳一些了，结束</button></view>
+  </block>
+
+  <block wx:else>
+    <view class="timer-panel"><text class="eyebrow">起身，离开当前的位置</text><view class="h2 timer-title">给自己 5 分钟物理抽离</view><text class="timer-note">走几步、倒一杯水，或看看窗外。离开页面后计时会按结束时间继续。</text><view class="timer-clock {{timerRunning ? 'timer-running' : ''}}">{{timeText}}</view><view wx:if="{{timerDone}}" class="notice timer-complete">5 分钟到了。轻轻活动一下肩颈，再回来。</view><button wx:if="{{!timerRunning}}" class="primary-btn full-btn timer-btn" bindtap="startTimer">{{remaining < 300 && remaining > 0 ? '继续计时' : timerDone ? '再计时 5 分钟' : '开始 5 分钟'}}</button><button wx:else class="secondary-btn full-btn timer-btn" bindtap="pauseTimer">暂停</button><button class="text-btn full-btn" bindtap="resetTimer">重置计时</button></view>
+  </block>
+</view>

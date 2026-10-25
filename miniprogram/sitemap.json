@@ -1,0 +1,4 @@
+{
+  "desc": "止念不开放内容索引",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}
