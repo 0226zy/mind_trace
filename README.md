@@ -31,8 +31,10 @@ mind_trace/
 ├─ web/                      # 可选 Vue 3 + Vite 管理端，仅 HTTP 模式
 ├─ compose.yaml              # 可选 MySQL + Go API + Vue 一键编排
 ├─ docs/
+│  ├─ README.md              # 文档地图与分角色阅读顺序
 │  ├─ product-design.md      # 产品、信息架构、交互与状态
-│  ├─ architecture.md        # 双模式架构、安全、同步与部署
+│  ├─ architecture.md        # 双模式架构、安全、同步、部署与扩容
+│  ├─ code-design.md         # 全系统模块、时序、配置、测试与扩展规范
 │  ├─ cloud-api.md           # 默认云开发调用契约
 │  ├─ cloud-deployment.md    # 云环境、函数、集合、规则、索引与验收
 │  ├─ api-contract.md        # HTTP V1 API 契约
@@ -165,7 +167,7 @@ Vue 管理端只连接 Go + MySQL HTTP 模式，不读取微信云数据库；cl
 
 | 变量 | 必填 | 说明 |
 |---|---|---|
-| `APP_ENV` | 是 | `development` 或 `production`；只有开发环境允许开发登录 |
+| `APP_ENV` | 否 | 默认 `development`，可设 `production`；只有开发环境允许开发登录 |
 | `PORT` | 否 | Go HTTP 监听端口，默认 `8080` |
 | `MYSQL_DSN` | 是 | MySQL 连接串；凭据仅放服务端，禁止提交和写日志 |
 | `JWT_SECRET` | 是 | JWT HS256 密钥，至少 32 字节，生产使用独立高熵随机值 |
@@ -173,7 +175,7 @@ Vue 管理端只连接 Go + MySQL HTTP 模式，不读取微信云数据库；cl
 | `WECHAT_APP_ID` | 正式登录必填 | 小程序真实 AppID |
 | `WECHAT_APP_SECRET` | 正式登录必填 | 小程序 AppSecret，仅用于服务端调用微信接口 |
 | `WECHAT_API_URL` | 否 | `jscode2session` 地址，默认微信官方接口 |
-| `AUTH_DEV_MODE` | 是 | 仅本地开发可设 `true`；测试/预发/生产必须为 `false` |
+| `AUTH_DEV_MODE` | 否 | 默认 `false`；仅本地开发可设 `true`，测试/预发/生产必须为 `false` |
 | `ADMIN_USERNAME` | 管理端需要 | 管理员账号，与密码同时配置 |
 | `ADMIN_PASSWORD` | 管理端需要 | 独立高强度管理员密码 |
 | `ALLOWED_ORIGINS` | 否 | 管理端跨域来源白名单；生产避免 `*` |
@@ -241,11 +243,22 @@ npm run build
 
 ## 文档入口
 
-- [产品与交互设计](./docs/product-design.md)：低刺激交互、完整流程、七步评估、复发、应急叫停、空态与数据模式说明。
-- [技术架构](./docs/architecture.md)：默认 cloud 与保留 HTTP 的分层、身份、模型、权限、离线同步、安全备份和部署。
-- [云开发 API 契约](./docs/cloud-api.md)：`mindTrace` action、集合、OPENID、事务与幂等。
-- [云开发部署指南](./docs/cloud-deployment.md)：真实 AppID、环境、云函数、集合、规则、索引和体验版验收。
+先看 **[文档导航](./docs/README.md)**，按产品、cloud 开发、HTTP 开发／部署或发布任务选择阅读顺序。
+
+### 产品与系统设计
+
+- [产品与交互设计](./docs/product-design.md)：角色、场景、实际页面、七步评估、复发、离线、应急、V1 边界与验收。
+- [技术架构](./docs/architecture.md)：双模式分层、身份、模型、权限、离线同步、安全、部署和扩容限制。
+- [代码设计](./docs/code-design.md)：仓库结构、模块职责、核心代码时序、配置、测试文件与扩展规范。
+
+### API 契约
+
+- [云开发 API 契约](./docs/cloud-api.md)：`mindTrace` 的 14 个 action、集合、OPENID、事务与幂等。
 - [HTTP API 契约](./docs/api-contract.md)：Go 路径、请求响应、字段约束和状态枚举。
+
+### 部署与发布
+
+- [云开发部署指南](./docs/cloud-deployment.md)：真实 AppID、环境、云函数、集合、规则、索引和体验版验收。
 - [发布工作清单](./docs/release-checklist.md)：通用、cloud 默认、HTTP 可选的分模式发布步骤。
 
 ## 安全与隐私底线
