@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -21,7 +23,7 @@ type CreateRecordInput struct {
 	ClientRequestID *string         `json:"clientRequestId"`
 	TriggerEvent    string          `json:"triggerEvent" binding:"required"`
 	Emotions        models.Emotions `json:"emotions"`
-	Intensity       int             `json:"intensity" binding:"required"`
+	Intensity       *int            `json:"intensity"`
 	LoopThought     string          `json:"loopThought" binding:"required"`
 }
 
@@ -42,8 +44,8 @@ func (s *RecordService) Create(ctx context.Context, userID uint64, input CreateR
 	if err := validateText("loopThought", input.LoopThought, 1, 1000); err != nil {
 		return RecordResult{}, err
 	}
-	if input.Intensity < 1 || input.Intensity > 10 {
-		return RecordResult{}, api.BadRequest("intensity must be between 1 and 10")
+	if err := validateIntensity(input.Intensity); err != nil {
+		return RecordResult{}, err
 	}
 	if err := validateEmotions(input.Emotions); err != nil {
 		return RecordResult{}, err
@@ -151,6 +153,13 @@ func (s *RecordService) findByClientRequestID(ctx context.Context, userID uint64
 	return RecordResult{Thought: thought, Record: record}, true, nil
 }
 
+func validateIntensity(intensity *int) error {
+	if intensity != nil && (*intensity < 1 || *intensity > 10) {
+		return api.BadRequest("intensity must be between 1 and 10")
+	}
+	return nil
+}
+
 func validateEmotions(emotions models.Emotions) error {
 	if len(emotions) > 20 {
 		return api.BadRequest("at most 20 emotions are allowed")
@@ -199,7 +208,25 @@ func (s *RecordService) Get(ctx context.Context, userID, id uint64) (models.Reco
 	return record, err
 }
 
+// PatchField distinguishes an omitted field from an explicit JSON null.
+type PatchField[T any] struct {
+	Value   T
+	Present bool
+	Null    bool
+}
+
+func (f *PatchField[T]) UnmarshalJSON(data []byte) error {
+	f.Present = true
+	if bytes.Equal(bytes.TrimSpace(data), []byte("null")) {
+		f.Null = true
+		return nil
+	}
+	return json.Unmarshal(data, &f.Value)
+}
+
 type PatchRecordInput struct {
+	Emotions            PatchField[models.Emotions]  `json:"emotions"`
+	Intensity           PatchField[int]              `json:"intensity"`
 	Step                *int                         `json:"step"`
 	Status              *string                      `json:"status"`
 	RuminationType      *string                      `json:"ruminationType"`
@@ -213,8 +240,35 @@ type PatchRecordInput struct {
 	CloseConfirmations  *[]bool                      `json:"closeConfirmations"`
 }
 
-func (s *RecordService) Patch(ctx context.Context, userID, id uint64, input PatchRecordInput) (models.Record, error) {
+func metadataPatchUpdates(input PatchRecordInput) (map[string]any, error) {
 	updates := make(map[string]any)
+	if input.Emotions.Present {
+		if input.Emotions.Null {
+			return nil, api.BadRequest("emotions must be an array")
+		}
+		if err := validateEmotions(input.Emotions.Value); err != nil {
+			return nil, err
+		}
+		updates["emotions"] = input.Emotions.Value
+	}
+	if input.Intensity.Present {
+		if input.Intensity.Null {
+			updates["intensity"] = nil
+		} else {
+			if err := validateIntensity(&input.Intensity.Value); err != nil {
+				return nil, err
+			}
+			updates["intensity"] = input.Intensity.Value
+		}
+	}
+	return updates, nil
+}
+
+func (s *RecordService) Patch(ctx context.Context, userID, id uint64, input PatchRecordInput) (models.Record, error) {
+	updates, err := metadataPatchUpdates(input)
+	if err != nil {
+		return models.Record{}, err
+	}
 	if input.Step != nil {
 		if *input.Step < 0 || *input.Step > 7 {
 			return models.Record{}, api.BadRequest("step must be between 0 and 7")
@@ -277,18 +331,52 @@ func (s *RecordService) Patch(ctx context.Context, userID, id uint64, input Patc
 	if len(updates) == 0 {
 		return models.Record{}, api.BadRequest("no fields to update")
 	}
+	syncEmotions := input.Emotions.Present
+	var snapshot models.Record
+	if syncEmotions {
+		var err error
+		snapshot, err = s.Get(ctx, userID, id)
+		if err != nil {
+			return models.Record{}, err
+		}
+	}
 	var record models.Record
-	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	err = s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var thought models.Thought
+		if syncEmotions {
+			// Match create/close lock order: thought before its record versions.
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ? AND user_id = ?", snapshot.ThoughtID, userID).First(&thought).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					return api.NotFound()
+				}
+				return err
+			}
+		}
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id = ? AND user_id = ?", id, userID).First(&record).Error; err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				return api.NotFound()
 			}
 			return err
 		}
+		if syncEmotions && record.ThoughtID != thought.ID {
+			return api.NotFound()
+		}
 		if record.Status == "closed" {
 			return api.Conflict("closed records cannot be edited")
 		}
-		return tx.Model(&models.Record{}).Where("id = ? AND user_id = ?", id, userID).Updates(updates).Error
+		if err := tx.Model(&models.Record{}).Where("id = ? AND user_id = ?", id, userID).Updates(updates).Error; err != nil {
+			return err
+		}
+		if syncEmotions {
+			var latest models.Record
+			if err := tx.Select("id").Where("thought_id = ? AND user_id = ?", record.ThoughtID, userID).Order("version_no DESC").First(&latest).Error; err != nil {
+				return err
+			}
+			if latest.ID == id {
+				return tx.Model(&models.Thought{}).Where("id = ? AND user_id = ?", thought.ID, userID).Update("emotions", input.Emotions.Value).Error
+			}
+		}
+		return nil
 	})
 	if err != nil {
 		return models.Record{}, err

@@ -3,15 +3,9 @@ function trimmed(value) {
 }
 
 function validateQuick(form) {
-  const triggerEvent = trimmed(form.triggerEvent);
   const loopThought = trimmed(form.loopThought);
-  const intensity = Number(form.intensity);
-  if (!triggerEvent) return '请写下触发这件事的场景';
-  if (triggerEvent.length > 100) return '触发事件不能超过 100 字';
-  if (!Array.isArray(form.emotions) || !form.emotions.length) return '请至少选择一种情绪';
-  if (!Number.isInteger(intensity) || intensity < 1 || intensity > 10) return '情绪强度需为 1–10';
-  if (!loopThought) return '请原话写下循环念头';
-  if (loopThought.length > 1000) return '循环念头不能超过 1000 字';
+  if (!loopThought) return '请写下此刻反复出现的思虑';
+  if (loopThought.length > 1000) return '思虑内容不能超过 1000 字';
   return '';
 }
 

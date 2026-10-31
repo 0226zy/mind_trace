@@ -60,7 +60,7 @@ func TestCheckConstraintsMatchProductionMigration(t *testing.T) {
 	}
 	recordChecks := parseSchema(t, &Record{}).ParseCheckConstraints()
 	expected := map[string]string{
-		"chk_records_intensity":   "intensity BETWEEN 1 AND 10",
+		"chk_records_intensity":   "intensity IS NULL OR intensity BETWEEN 1 AND 10",
 		"chk_records_probability": "probability IS NULL OR probability BETWEEN 0 AND 100",
 		"chk_records_step":        "step BETWEEN 0 AND 7",
 		"chk_records_status":      "status IN ('registered','evaluating','paused','closed')",
@@ -88,5 +88,26 @@ func TestCheckConstraintsMatchProductionMigration(t *testing.T) {
 		if !strings.Contains(sql, "CONSTRAINT "+name+" ") {
 			t.Errorf("production migration does not contain constraint %s", name)
 		}
+	}
+}
+
+func TestIntensityIsNullableInModelAndMigrations(t *testing.T) {
+	field := parseSchema(t, &Record{}).FieldsByName["Intensity"]
+	if field == nil || field.NotNull {
+		t.Fatalf("GORM intensity field is not nullable: %+v", field)
+	}
+	initial, err := os.ReadFile(filepath.Join("..", "..", "migrations", "001_init.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(initial), "intensity INT NULL") {
+		t.Fatal("fresh-install migration does not allow null intensity")
+	}
+	upgrade, err := os.ReadFile(filepath.Join("..", "..", "migrations", "002_allow_null_intensity.sql"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(upgrade), "ALTER TABLE records MODIFY COLUMN intensity INT NULL") {
+		t.Fatal("forward migration does not make intensity nullable")
 	}
 }

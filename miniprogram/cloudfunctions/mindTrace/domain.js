@@ -162,7 +162,8 @@ function normalizeCreateRecord(payload) {
   const result = {
     triggerEvent: text(value.triggerEvent, 'triggerEvent', 1, 100),
     emotions: value.emotions === undefined ? [] : validateEmotions(value.emotions),
-    intensity: integer(value.intensity, 'intensity', 1, 10),
+    intensity: value.intensity === undefined || value.intensity === null
+      ? null : integer(value.intensity, 'intensity', 1, 10),
     loopThought: text(value.loopThought, 'loopThought', 1, 1000)
   };
   if (value.thoughtId !== undefined) result.thoughtId = identifier(value.thoughtId, 'thoughtId');
@@ -220,10 +221,14 @@ function normalizePatchRecord(payload) {
   const value = normalizeId(payload, [
     'step', 'status', 'ruminationType', 'riskContent', 'probability',
     'controllableActions', 'uncontrollableItems', 'scenarioWorst',
-    'scenarioLikely', 'scenarioBest', 'closeConfirmations'
+    'scenarioLikely', 'scenarioBest', 'closeConfirmations', 'emotions', 'intensity'
   ]);
   const id = identifier(value.id);
   const updates = {};
+  if (value.emotions !== undefined) updates.emotions = validateEmotions(value.emotions);
+  if (value.intensity !== undefined) {
+    updates.intensity = value.intensity === null ? null : integer(value.intensity, 'intensity', 1, 10);
+  }
   if (value.step !== undefined) updates.step = integer(value.step, 'step', 0, 7);
   if (value.status !== undefined) {
     if (value.status === 'closed') badRequest('use the close endpoint to close a record');
@@ -417,6 +422,7 @@ function buildStats(thoughts, records, now = new Date()) {
   since.setDate(since.getDate() - 29);
   const daily = new Map();
   for (const record of records) {
+    if (!Number.isInteger(record.intensity) || record.intensity < 1 || record.intensity > 10) continue;
     const createdAt = new Date(record.createdAt);
     if (Number.isNaN(createdAt.getTime()) || createdAt < since) continue;
     const date = localDay(createdAt);

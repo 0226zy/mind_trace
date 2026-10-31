@@ -45,12 +45,13 @@
 
 - 所有业务查询使用 `ownerOpenid = 当前 WXContext.OPENID`，不能使用客户端声明的归属。
 - `users` 保存 `ownerOpenid`、`generation`、`deleting`、`deletingAt`、`lastWriteAt` 等内部字段；`thoughts` 保存 `versionCount`、`openCount`，用于事务内分配版本号和聚合状态。
-- `createRecord` 使用 `db.runTransaction`。记录 `_id` 根据 `OPENID + clientRequestId` 经 SHA-256 确定性生成，同一微信用户重试返回首次记录；这是记录幂等 ID，不是公开用户 ID。
+- `createRecord` 使用 `db.runTransaction`。记录 `_id` 根据 `OPENID + clientRequestId` 经 SHA-256 确定性生成，同一微信用户重试返回首次记录；这是记录幂等 ID，不是公开用户 ID。`intensity` 可省略或为 `null`，有值时必须是 1–10 整数。
 - 关联复发时锁定思虑文档并递增 `versionCount`；并发版本号不得重复。新版本继承评估字段但重置 `closeConfirmations`。
+- `patchRecord` 接受 `emotions` 与 `intensity`；情绪可为空数组但不可为 `null`，强度可为 1–10 或显式 `null`。修改最新版本情绪时，在同一事务内同步 `thought.emotions`；历史版本不得修改当前聚合。
 - 版本 >=3 为 `recurring`；不足 3 版且 `openCount=0` 为 `resolved`，否则为 `active`。
 - `closeRecord` 在事务中校验记录与思虑文档，更新 `closed/openCount/status`。
 - 时间统一存 ISO 字符串，保持小程序现有归一化逻辑。
-- 检索/统计在云函数内按当前 `ownerOpenid` 分批读取后计算；必须分页读取全部数据，不能假设只有前 20/100 条。
+- 检索/统计在云函数内按当前 `ownerOpenid` 分批读取后计算；必须分页读取全部数据，不能假设只有前 20/100 条。强度趋势忽略 `null` 和非 1–10 整数，不把空值当作 0。
 
 ## 离线队列归属
 

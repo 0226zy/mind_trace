@@ -125,6 +125,30 @@ test('草稿严格校验并禁止通过 patch 收尾', () => {
   expectBadRequest(() => normalizePatchRecord({ id: 'r_1', step: 1, userId: 'forged' }));
 });
 
+test('创建允许省略或显式置空强度，但不补默认值', () => {
+  const base = { triggerEvent: '事', loopThought: '想' };
+  assert.equal(normalizeCreateRecord(base).intensity, null);
+  assert.equal(normalizeCreateRecord({ ...base, intensity: null }).intensity, null);
+  assert.equal(normalizeCreateRecord({ ...base, intensity: 1 }).intensity, 1);
+  for (const intensity of [0, 11, 1.5, '5', false]) {
+    expectBadRequest(() => normalizeCreateRecord({ ...base, intensity }));
+  }
+});
+
+test('patch 支持情绪数组和可空强度，null 不能绕过情绪校验', () => {
+  const patched = normalizePatchRecord({ id: 'r_1', emotions: [], intensity: null });
+  assert.deepEqual(patched.updates, { emotions: [], intensity: null });
+  assert.deepEqual(normalizePatchRecord({ id: 'r_1', emotions: ['焦虑'], intensity: 10 }).updates,
+    { emotions: ['焦虑'], intensity: 10 });
+  for (const payload of [
+    { emotions: null }, { emotions: '焦虑' }, { emotions: [null] },
+    { intensity: 0 }, { intensity: 11 }, { intensity: 1.5 }, { intensity: '5' },
+    { emotions: null, intensity: 5 }, { intensity: 'invalid', emotions: [] }
+  ]) {
+    expectBadRequest(() => normalizePatchRecord({ id: 'r_1', ...payload }));
+  }
+});
+
 test('分页默认 20 且上限 100，状态值受约束', () => {
   assert.deepEqual(normalizeListRecords({}), { status: '', page: 1, pageSize: 20 });
   assert.equal(normalizeListRecords({ pageSize: 100 }).pageSize, 100);
@@ -235,4 +259,20 @@ test('统计包含 avgIntensity、完成率、情绪及三版复发，可处理�
   const point = result.intensityTrend.find((item) => item.date === '2026-10-25');
   assert.equal(point.avgIntensity, 6);
   assert.ok(result.intensityTrend.every((item) => Object.hasOwn(item, 'avgIntensity')));
+});
+
+test('强度统计忽略 null、缺失和非整数，不产生 NaN 或零值污染', () => {
+  const now = new Date('2026-10-25T12:00:00.000Z');
+  const records = [null, undefined, 0, 1.5, '8', false, 4, 8].map((intensity, index) => ({
+    thoughtId: 't_1', status: 'registered', intensity,
+    createdAt: `2026-10-25T01:${String(index).padStart(2, '0')}:00.000Z`
+  }));
+  const result = buildStats([{ _id: 't_1', emotions: [] }], records, now);
+  assert.equal(result.totalRecords, 8);
+  assert.deepEqual(result.intensityTrend, [{ date: '2026-10-25', avgIntensity: 6 }]);
+  const empty = buildStats([], [{
+    thoughtId: 't_1', status: 'registered', intensity: null,
+    createdAt: '2026-10-25T01:00:00.000Z'
+  }], now);
+  assert.deepEqual(empty.intensityTrend, []);
 });

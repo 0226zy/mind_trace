@@ -1,14 +1,17 @@
-.offline-panel { background: #ECEFEA; border-radius: 22rpx; padding: 24rpx; margin-bottom: 28rpx; }
+.offline-panel { border-top: 1rpx solid #DDE2DB; border-bottom: 1rpx solid #DDE2DB; padding: 26rpx 0 12rpx; margin-bottom: 32rpx; }
 .offline-title { font-weight: 600; font-size: 28rpx; }
-.local-item { border-top: 1rpx solid #D8DEDA; padding: 22rpx 0 4rpx; margin-top: 20rpx; }
+.account-warning { margin-top: 22rpx; }
+.local-item { border-top: 1rpx solid #E1E4DE; padding: 24rpx 0; margin-top: 22rpx; }
+.local-item .list-meta { display: block; margin-top: 12rpx; }
 .local-item-title { font-size: 27rpx; max-width: 70%; }
-.segmented { display: flex; padding: 6rpx; background: #E9EBE7; border-radius: 18rpx; margin-bottom: 30rpx; }
-.segment { flex: 1; min-height: 76rpx; background: transparent; color: #6E7A7D; border-radius: 14rpx; font-size: 27rpx; }
-.segment-active { background: #FCFBF8; color: #40565E; font-weight: 600; }
+.segmented { display: flex; border-bottom: 1rpx solid #DDE2DB; margin-bottom: 12rpx; }
+.segment { flex: 1; min-height: 84rpx; background: transparent; color: #737D76; border-radius: 0; border-bottom: 4rpx solid transparent; font-size: 27rpx; }
+.segment-active { color: #294A45; border-bottom-color: #385C57; font-weight: 600; }
 .record-list { padding-bottom: 30rpx; }
-.record-card { margin-bottom: 20rpx; }
-.record-trigger { font-size: 31rpx; font-weight: 600; margin-top: 22rpx; }
-.record-thought { color: #69767A; font-size: 27rpx; margin-top: 12rpx; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
-.record-footer { margin-top: 24rpx; }
-.open-text { color: #526F7D; font-size: 25rpx; flex-shrink: 0; }
-.record-card .progress-track { margin-top: 20rpx; }
+.record-item { padding: 32rpx 0 34rpx; border-bottom: 1rpx solid #E1E4DE; }
+.record-trigger { font-size: 32rpx; font-weight: 600; line-height: 1.55; margin-top: 20rpx; }
+.record-thought { color: #69736E; font-size: 27rpx; margin-top: 12rpx; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.record-footer { margin-top: 24rpx; align-items: flex-end; }
+.record-footer .list-meta { max-width: 64%; }
+.open-text { color: #385C57; font-size: 25rpx; flex-shrink: 0; }
+.record-item .progress-track { margin-top: 24rpx; }

@@ -169,6 +169,13 @@ type IntensityPoint struct {
 	AvgIntensity float64 `json:"avgIntensity"`
 }
 
+func (s *ThoughtService) intensityTrendQuery(ctx context.Context, userID uint64, since time.Time) *gorm.DB {
+	return s.db.WithContext(ctx).Model(&models.Record{}).
+		Select("DATE(created_at) AS date, AVG(intensity) AS avg_intensity").
+		Where("user_id = ? AND created_at >= ? AND intensity IS NOT NULL", userID, since).
+		Group("DATE(created_at)").Order("date ASC")
+}
+
 func (s *ThoughtService) Stats(ctx context.Context, userID uint64) (map[string]any, error) {
 	var totalThoughts, totalRecords, closedRecords, recurringThoughts int64
 	counts := []struct {
@@ -209,7 +216,7 @@ func (s *ThoughtService) Stats(ctx context.Context, userID uint64) (map[string]a
 	trend := make([]IntensityPoint, 0)
 	now := time.Now()
 	since := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -29)
-	if err := s.db.WithContext(ctx).Model(&models.Record{}).Select("DATE(created_at) AS date, AVG(intensity) AS avg_intensity").Where("user_id = ? AND created_at >= ?", userID, since).Group("DATE(created_at)").Order("date ASC").Scan(&trend).Error; err != nil {
+	if err := s.intensityTrendQuery(ctx, userID, since).Scan(&trend).Error; err != nil {
 		return nil, err
 	}
 	return map[string]any{"totalThoughts": totalThoughts, "totalRecords": totalRecords, "closedRecords": closedRecords, "completionRate": completionRate, "recurringThoughts": recurringThoughts, "emotionCounts": emotionCounts, "intensityTrend": trend}, nil

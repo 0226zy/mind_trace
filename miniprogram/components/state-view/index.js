@@ -1,4 +1,5 @@
 Component({
+  options: { styleIsolation: 'shared' },
   properties: {
     loading: Boolean,
     loadingText: String,

@@ -18,6 +18,7 @@ const api = {
   records: (params) => request({ path: `/records?${queryString(params)}` }),
   record: (id) => request({ path: `/records/${encodeURIComponent(id)}` }),
   saveEvaluation: (id, payload) => request({ path: `/records/${encodeURIComponent(id)}`, method: 'PATCH', data: payload }),
+  saveRecordDetails: (id, payload) => request({ path: `/records/${encodeURIComponent(id)}`, method: 'PATCH', data: payload }),
   closeRecord: (id) => request({ path: `/records/${encodeURIComponent(id)}/close`, method: 'POST' }),
   pauseRecord: (id) => request({ path: `/records/${encodeURIComponent(id)}/pause`, method: 'POST' }),
   thoughts: (params) => request({ path: `/thoughts?${queryString(params)}` }),

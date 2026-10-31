@@ -47,7 +47,7 @@ type Record struct {
 	VersionNo           int                 `gorm:"not null;uniqueIndex:uk_records_thought_version" json:"versionNo"`
 	TriggerEvent        string              `gorm:"size:100;not null" json:"triggerEvent"`
 	Emotions            Emotions            `gorm:"type:json" json:"emotions"`
-	Intensity           int                 `gorm:"not null;check:chk_records_intensity,intensity BETWEEN 1 AND 10" json:"intensity"`
+	Intensity           *int                `gorm:"check:chk_records_intensity,intensity IS NULL OR intensity BETWEEN 1 AND 10" json:"intensity"`
 	LoopThought         string              `gorm:"size:1000;not null" json:"loopThought"`
 	Status              string              `gorm:"size:16;not null;default:registered;index:idx_records_user_status;check:chk_records_status,status IN ('registered','evaluating','paused','closed')" json:"status"`
 	Step                int                 `gorm:"not null;default:0;check:chk_records_step,step BETWEEN 0 AND 7" json:"step"`

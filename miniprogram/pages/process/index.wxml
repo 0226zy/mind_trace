@@ -7,7 +7,7 @@
     <view wx:if="{{hasBlockedBackend}}" class="notice notice-warm account-warning">检测到后端模式或环境变化，或旧记录缺少后端标识。相关记录已停止同步并完整保留，不会跨环境重放。</view>
     <view class="local-item" wx:for="{{offlineItems}}" wx:key="clientRequestId" data-id="{{item.clientRequestId}}" bindtap="openLocal">
       <view class="row-between"><text class="local-item-title wrap">{{item.triggerEvent}}</text><text class="tag {{item.syncState === 'uncertain' || item.syncState === 'failed' || item.syncState === 'blocked' ? 'tag-warm' : 'tag-neutral'}}">{{item.syncStateText}}</text></view>
-      <text class="list-meta">强度 {{item.intensity}} · {{item.createdAtText}}</text>
+      <text class="list-meta">{{item.intensity > 0 ? '强度 ' + item.intensity : '强度未补充'}} · {{item.createdAtText}}</text>
     </view>
   </view>
 
@@ -19,11 +19,11 @@
   <state-view loading="{{loading}}" error="{{error}}" empty="{{!loading && !error && !visibleRecords.length}}" empty-title="{{tab === 'pending' ? '没有等待处理的思虑' : '还没有已收尾的记录'}}" empty-text="{{tab === 'pending' ? '此刻不需要做什么，安心回到当下。' : '完成七步评估后，记录会收在这里。'}}" bind:retry="load" />
 
   <view wx:if="{{!loading && !error}}" class="record-list">
-    <view class="card record-card" wx:for="{{visibleRecords}}" wx:key="id" data-id="{{item.id}}" bindtap="openRecord" role="button">
+    <view class="record-item" wx:for="{{visibleRecords}}" wx:key="id" data-id="{{item.id}}" bindtap="openRecord" role="button">
       <view class="row-between"><text class="tag {{item.status === 'closed' ? 'tag-neutral' : ''}}">{{item.statusText}}</text><text class="list-meta">v{{item.versionNo || 1}}</text></view>
       <view class="record-trigger wrap">{{item.triggerEvent}}</view>
-      <view class="record-thought wrap">{{item.loopThought}}</view>
-      <view class="row-between record-footer"><text class="list-meta">强度 {{item.intensity}} · {{item.updatedAtText}}</text><text class="open-text">{{tab === 'pending' ? (item.step ? '继续第 ' + item.step + ' 步' : '开始评估') : '查看记录'}} →</text></view>
+      <view wx:if="{{item.loopThought && item.loopThought !== item.triggerEvent}}" class="record-thought wrap">{{item.loopThought}}</view>
+      <view class="row-between record-footer"><text class="list-meta">{{item.intensity > 0 ? '强度 ' + item.intensity : '强度未补充'}} · {{item.updatedAtText}}</text><text class="open-text">{{tab === 'pending' ? (item.step ? '继续第 ' + item.step + ' 步' : '开始评估') : '查看记录'}} →</text></view>
       <view wx:if="{{tab === 'pending'}}" class="progress-track"><view class="progress-fill" style="width: {{item.step / 7 * 100}}%"></view></view>
     </view>
   </view>

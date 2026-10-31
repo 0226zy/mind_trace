@@ -12,10 +12,10 @@ Base URL：`/api/v1`。除登录与健康检查外均需 `Authorization: Bearer 
 
 - `GET /dashboard`：返回 `{todayCount, pendingCount, closedCount, thoughtCount}`。
 - `POST /thoughts/match`：`{text}`，返回 `{items:[{thought, score}]}`，仅提示，不自动关联。
-- `POST /records`：快速登记。请求 `{thoughtId?, clientRequestId?, triggerEvent, emotions[], intensity, loopThought}`；无 `thoughtId` 时同时创建思虑点，有则为已有思虑点新增版本并继承上一版评估字段，但收尾确认会重置。`clientRequestId` 为 1–64 字符的客户端幂等键，同一用户重复提交返回首次结果，不重复创建。返回 `{thought, record}`。
+- `POST /records`：快速登记。请求 `{thoughtId?, clientRequestId?, triggerEvent, emotions[], intensity?, loopThought}`；`intensity` 可省略或为 `null`，表示记录后尚未补充。无 `thoughtId` 时同时创建思虑点，有则为已有思虑点新增版本并继承上一版评估字段，但收尾确认会重置。`clientRequestId` 为 1–64 字符的客户端幂等键，同一用户重复提交返回首次结果，不重复创建。返回 `{thought, record}`。
 - `GET /records?status=&page=&pageSize=`：登记版本队列，返回 `{items, total, page, pageSize}`。
 - `GET /records/:id`：版本详情。
-- `PATCH /records/:id`：保存七步评估草稿。可包含 `{step, status, ruminationType, riskContent, probability, controllableActions[], uncontrollableItems[], scenarioWorst, scenarioLikely, scenarioBest, closeConfirmations[]}`。
+- `PATCH /records/:id`：保存七步评估草稿或记录后补充信息。可包含 `{step, status, ruminationType, riskContent, probability, controllableActions[], uncontrollableItems[], scenarioWorst, scenarioLikely, scenarioBest, closeConfirmations[], emotions[], intensity}`。`emotions` 可为空数组但不可为 `null`；`intensity` 可为 1–10 整数或显式 `null`。修改最新版本情绪时同步思虑点聚合，历史版本不影响当前聚合。
 - `POST /records/:id/close`：校验必填项及三项确认，状态改为 `closed`。
 - `POST /records/:id/pause`：状态改为 `paused`。
 
@@ -25,7 +25,7 @@ Base URL：`/api/v1`。除登录与健康检查外均需 `Authorization: Bearer 
 
 - `GET /thoughts?query=&status=&emotion=&page=&pageSize=`：返回 `{items, total, page, pageSize}`；每项包含思虑点、版本计数、最近记录与当前进度。
 - `GET /thoughts/:id`：返回 `{thought, records}`，按版本倒序。
-- `GET /stats/summary`：返回 `{totalThoughts, totalRecords, closedRecords, completionRate, recurringThoughts, emotionCounts, intensityTrend}`。
+- `GET /stats/summary`：返回 `{totalThoughts, totalRecords, closedRecords, completionRate, recurringThoughts, emotionCounts, intensityTrend}`。平均强度只统计具有合法 1–10 强度的记录，忽略 `null`。
 
 ## 管理端
 
@@ -35,8 +35,8 @@ Base URL：`/api/v1`。除登录与健康检查外均需 `Authorization: Bearer 
 
 ## 字段约束
 
-- `triggerEvent` 必填，1–100 字；`loopThought` 必填，1–1000 字。
-- `intensity` 为 1–10；`probability` 为 0–100。
+- `triggerEvent` 必填，1–100 字；`loopThought` 必填，1–1000 字。聚焦书写流程由客户端从正文首个非空行生成短标题，完整正文不被截断。
+- `intensity` 为 1–10 整数或 `null`；`probability` 为 0–100。
 - 版本状态：`registered`、`evaluating`、`paused`、`closed`。
 - `step` 为 0–7；思虑点状态：`active`、`resolved`、`recurring`。
 - 所有业务查询强制按当前用户隔离，禁止依赖客户端传用户 ID。

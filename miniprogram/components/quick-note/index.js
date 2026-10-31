@@ -5,25 +5,35 @@ const sync = require('../../services/sync');
 const offline = require('../../utils/offline');
 const { EMOTIONS } = require('../../utils/format');
 const { validateQuick } = require('../../utils/validate');
-const { emptyQuickForm, deletionResetState } = require('../../utils/quick-state');
+const { emptyQuickForm, buildQuickPayload, deletionResetState } = require('../../utils/quick-state');
 
 const emptyForm = emptyQuickForm;
+const intensityOptions = [
+  { label: '很轻', value: 2 },
+  { label: '较轻', value: 4 },
+  { label: '明显', value: 6 },
+  { label: '较强', value: 8 },
+  { label: '很强', value: 10 }
+];
 
 Component({
+  options: { styleIsolation: 'shared' },
   properties: {
     visible: { type: Boolean, value: false }
   },
   data: {
-    stage: 'edit', form: emptyForm(), emotionOptions: EMOTIONS.map((name) => ({ name, selected: false })), error: '', matchError: '',
-    submitting: false, similarItems: [], result: null, offlineSaved: false, restored: false, deletionEpoch: 0
+    stage: 'edit', form: emptyForm(), canSubmit: false,
+    emotionOptions: EMOTIONS.map((name) => ({ name, selected: false })), intensityOptions,
+    error: '', matchError: '', submitting: false, similarItems: [], result: null,
+    offlineSaved: false, restored: false, deletionEpoch: 0
   },
   lifetimes: {
     attached() {
       this.setData({ deletionEpoch: getApp().globalData.deletionEpoch });
       const draft = wx.getStorageSync(config.QUICK_DRAFT_KEY);
       if (draft && draft.form) {
-        this.setData({ form: Object.assign(emptyForm(), draft.form), restored: true });
-        this.syncEmotionOptions();
+        const form = Object.assign(emptyForm(), draft.form, { emotions: [], intensity: null });
+        this.setData({ form, canSubmit: Boolean(form.loopThought.trim()), restored: true });
       }
     }
   },
@@ -49,13 +59,12 @@ Component({
       wx.setStorageSync(config.QUICK_DRAFT_KEY, { form: this.data.form, updatedAt: new Date().toISOString() });
     },
     onInput(event) {
-      const field = event.currentTarget.dataset.field;
-      this.setData({ [`form.${field}`]: event.detail.value, error: '', restored: false });
+      const value = event.detail.value;
+      this.setData({ 'form.loopThought': value, canSubmit: Boolean(value.trim()), error: '', restored: false });
       this.persistDraft();
     },
     onIntensity(event) {
-      this.setData({ 'form.intensity': Number(event.detail.value), restored: false });
-      this.persistDraft();
+      this.setData({ 'form.intensity': Number(event.currentTarget.dataset.value), error: '' });
     },
     toggleEmotion(event) {
       const emotion = event.currentTarget.dataset.emotion;
@@ -63,17 +72,22 @@ Component({
       const index = selected.indexOf(emotion);
       if (index >= 0) selected.splice(index, 1);
       else selected.push(emotion);
-      this.setData({ 'form.emotions': selected, error: '', restored: false });
+      this.setData({ 'form.emotions': selected, error: '' });
       this.syncEmotionOptions();
-      this.persistDraft();
+    },
+    resetAfterSaved() {
+      this.setData({
+        stage: 'edit', form: emptyForm(), canSubmit: false, result: null,
+        offlineSaved: false, similarItems: [], error: '', matchError: '', restored: false
+      });
+      this.syncEmotionOptions();
     },
     close() {
       if (this.data.submitting) return;
+      const savedStage = this.data.stage === 'details' || this.data.stage === 'complete';
       this.persistDraft();
       this.triggerEvent('close');
-      if (this.data.stage === 'success') {
-        this.setData({ stage: 'edit', form: emptyForm(), result: null, offlineSaved: false, similarItems: [] });
-      }
+      if (savedStage) this.resetAfterSaved();
     },
     stopTouch() {},
     resetFeedback() {
@@ -87,8 +101,7 @@ Component({
       try {
         await auth.ensureLogin();
         if (!this.ensureActiveEpoch()) return;
-        const text = `${this.data.form.triggerEvent} ${this.data.form.loopThought}`;
-        const result = await api.matchThoughts(text);
+        const result = await api.matchThoughts(this.data.form.loopThought.trim());
         if (!this.ensureActiveEpoch()) return;
         const items = (result && result.items) || [];
         if (items.length) this.setData({ stage: 'match', similarItems: items, submitting: false });
@@ -111,11 +124,7 @@ Component({
     async createRecord(thoughtId) {
       if (!this.ensureActiveEpoch() || (this.data.submitting && this.data.stage === 'saving')) return;
       this.setData({ submitting: true, stage: 'saving', error: '' });
-      const payload = Object.assign({}, this.data.form, {
-        triggerEvent: this.data.form.triggerEvent.trim(),
-        loopThought: this.data.form.loopThought.trim(),
-        clientRequestId: offline.createClientRequestId()
-      });
+      const payload = buildQuickPayload(this.data.form, offline.createClientRequestId());
       if (thoughtId) payload.thoughtId = thoughtId;
       try {
         const result = await api.createRecord(payload);
@@ -128,16 +137,43 @@ Component({
     },
     saveOffline(existingPayload) {
       if (!this.ensureActiveEpoch()) return;
-      const payload = existingPayload || Object.assign({}, this.data.form, { clientRequestId: offline.createClientRequestId() });
+      const payload = existingPayload || buildQuickPayload(this.data.form, offline.createClientRequestId());
       const item = sync.enqueue(payload);
       this.showSuccess({ localRecord: item }, true);
     },
     showSuccess(result, offlineSaved) {
       if (!this.ensureActiveEpoch()) return;
       wx.removeStorageSync(config.QUICK_DRAFT_KEY);
-      this.setData({ stage: 'success', result, offlineSaved, submitting: false, form: emptyForm(), similarItems: [], restored: false });
+      const form = Object.assign({}, this.data.form, { triggerEvent: '', emotions: [], intensity: null });
+      this.setData({ stage: 'details', result, offlineSaved, submitting: false, form, similarItems: [], restored: false });
       this.syncEmotionOptions();
       this.triggerEvent('saved', { result, offlineSaved });
+    },
+    async saveDetails() {
+      if (!this.ensureActiveEpoch() || this.data.submitting) return;
+      const details = { emotions: this.data.form.emotions.slice(), intensity: this.data.form.intensity };
+      if (!details.emotions.length && details.intensity === null) { this.close(); return; }
+      this.setData({ submitting: true, error: '' });
+      try {
+        if (this.data.offlineSaved) {
+          const localRecord = this.data.result && this.data.result.localRecord;
+          if (!localRecord) throw new Error('这条本地记录已不存在');
+          const updated = sync.updateQueuedDetails(localRecord.clientRequestId, details);
+          this.setData({ stage: 'complete', result: { localRecord: updated }, submitting: false });
+        } else {
+          await auth.ensureLogin();
+          if (!this.ensureActiveEpoch()) return;
+          const current = this.data.result && this.data.result.record;
+          const id = current && (current.id || current._id);
+          if (!id) throw new Error('记录编号缺失，请稍后在处理页补充');
+          const record = await api.saveRecordDetails(id, details);
+          if (!this.ensureActiveEpoch()) return;
+          this.setData({ stage: 'complete', result: Object.assign({}, this.data.result, { record }), submitting: false });
+        }
+      } catch (error) {
+        if (!this.ensureActiveEpoch()) return;
+        this.setData({ submitting: false, error: error.network ? '感受尚未保存，请检查网络后重试；正文已安全记录。' : error.message });
+      }
     },
     later() { this.close(); },
     evaluateNow() {

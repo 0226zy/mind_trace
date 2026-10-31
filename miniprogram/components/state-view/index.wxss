@@ -1,3 +1,3 @@
-.loading-ring { width: 42rpx; height: 42rpx; margin: 0 auto 24rpx; border: 3rpx solid #D7DEDC; border-top-color: #7E97A6; border-radius: 50%; animation: spin 1s linear infinite; }
+.loading-ring { width: 36rpx; height: 36rpx; margin: 0 auto 24rpx; border: 2rpx solid #D8DED7; border-top-color: #385C57; border-radius: 50%; animation: spin 1s linear infinite; }
 .retry-btn { margin-top: 28rpx; }
 @keyframes spin { to { transform: rotate(360deg); } }

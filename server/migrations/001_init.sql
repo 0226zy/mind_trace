@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS records (
   version_no INT NOT NULL,
   trigger_event VARCHAR(100) NOT NULL,
   emotions JSON NULL,
-  intensity INT NOT NULL,
+  intensity INT NULL,
   loop_thought VARCHAR(1000) NOT NULL,
   status VARCHAR(16) NOT NULL DEFAULT 'registered',
   step INT NOT NULL DEFAULT 0,
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS records (
   KEY idx_records_thought_id (thought_id),
   CONSTRAINT fk_records_thought FOREIGN KEY (thought_id) REFERENCES thoughts(id) ON DELETE CASCADE,
   CONSTRAINT fk_records_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  CONSTRAINT chk_records_intensity CHECK (intensity BETWEEN 1 AND 10),
+  CONSTRAINT chk_records_intensity CHECK (intensity IS NULL OR intensity BETWEEN 1 AND 10),
   CONSTRAINT chk_records_probability CHECK (probability IS NULL OR probability BETWEEN 0 AND 100),
   CONSTRAINT chk_records_step CHECK (step BETWEEN 0 AND 7),
   CONSTRAINT chk_records_status CHECK (status IN ('registered','evaluating','paused','closed'))

@@ -1,7 +1,7 @@
 // 默认微信云开发；DATA_MODE 改为 'http' 时使用 API_BASE。AppSecret 只能保存在服务端。
 module.exports = {
   DATA_MODE: 'cloud',
-  CLOUD_ENV: '',
+  CLOUD_ENV: 'cloud1-d9gu4o8z6a3835195',
   CLOUD_FUNCTION_NAME: 'mindTrace',
   API_BASE: 'https://your-api.example.com/api/v1',
   REQUEST_TIMEOUT: 12000,

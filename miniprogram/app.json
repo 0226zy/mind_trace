@@ -11,16 +11,16 @@
     "pages/profile/index"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#F7F6F2",
+    "navigationBarBackgroundColor": "#F7F7F4",
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "止念",
-    "backgroundColor": "#F7F6F2",
+    "backgroundColor": "#F7F7F4",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#7B8588",
-    "selectedColor": "#526F7D",
-    "backgroundColor": "#FBFAF7",
+    "color": "#737D76",
+    "selectedColor": "#385C57",
+    "backgroundColor": "#F7F7F4",
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/now/index", "text": "此刻" },

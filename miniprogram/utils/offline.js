@@ -28,4 +28,22 @@ function canAutoSync(item, currentUserId, currentBackend) {
     && !ownershipBlock(item, currentUserId, currentBackend));
 }
 
-module.exports = { createClientRequestId, nextQueue, markQueueItem, removeQueueItem, canAutoSync };
+function withQueuedDetails(queue, clientRequestId, details) {
+  let found = false;
+  const next = (Array.isArray(queue) ? queue : []).map((item) => {
+    if (item.clientRequestId !== clientRequestId) return item;
+    found = true;
+    if (item.syncState !== 'queued') throw new Error('这条记录已开始同步，请稍后再补充感受');
+    return Object.assign({}, item, {
+      payload: Object.assign({}, item.payload, {
+        emotions: details.emotions,
+        intensity: details.intensity,
+        clientRequestId: item.clientRequestId
+      })
+    });
+  });
+  if (!found) throw new Error('这条本地记录已不存在');
+  return next;
+}
+
+module.exports = { createClientRequestId, nextQueue, markQueueItem, removeQueueItem, canAutoSync, withQueuedDetails };

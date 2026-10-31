@@ -1,7 +1,7 @@
 <view class="page">
   <block wx:if="{{item}}">
     <text class="eyebrow">仅保存在本机的登记</text><view class="h1 local-title wrap">{{item.payload.triggerEvent}}</view>
-    <view class="card"><view class="row-between"><text class="tag tag-warm">{{item.syncStateText}}</text><text class="list-meta">{{item.createdAtText}}</text></view><view class="local-field"><text class="field-label">情绪与强度</text><text>{{item.emotionsText}} · {{item.payload.intensity}}/10</text></view><view class="local-field"><text class="field-label">循环念头</text><text class="wrap">{{item.payload.loopThought}}</text></view></view>
+    <view class="local-meta"><view class="row-between"><text class="tag tag-warm">{{item.syncStateText}}</text><text class="list-meta">{{item.createdAtText}}</text></view><view class="local-field"><text class="field-label">情绪与强度</text><text>{{item.emotionsText || '情绪未补充'}} · {{item.payload.intensity > 0 ? item.payload.intensity + '/10' : '强度未补充'}}</text></view><view class="local-field"><text class="field-label">思虑正文</text><text class="wrap">{{item.payload.loopThought}}</text></view></view>
     <view wx:if="{{item.syncState === 'uncertain'}}" class="notice notice-warm local-notice">上次请求可能已到达服务端。自动同步已暂停，请先到思虑库确认，避免重复提交。</view>
     <view wx:if="{{item.blockReason === 'accountChanged'}}" class="notice notice-warm local-notice">当前已是另一个内部用户账号。这条旧记录已停止同步并保留在本机，绝不会写入新账号。</view>
     <view wx:if="{{item.blockReason === 'backendChanged'}}" class="notice notice-warm local-notice">当前后端模式或环境与登记时不同。这条记录已停止同步并保留在本机，绝不会跨环境重放。</view>

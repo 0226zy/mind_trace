@@ -28,7 +28,7 @@
       <view wx:elif="{{step === 3}}" class="step-body">
         <view class="question">这件事实际发生的概率有多大？</view>
         <view class="probability-value">{{form.probability}}<text>%</text></view>
-        <slider min="0" max="100" step="1" value="{{form.probability}}" activeColor="#7E97A6" backgroundColor="#DDE3E1" block-color="#7E97A6" block-size="26" bindchange="onProbability" aria-label="发生概率，0 到 100" />
+        <slider min="0" max="100" step="1" value="{{form.probability}}" activeColor="#385C57" backgroundColor="#DDE2DB" block-color="#385C57" block-size="24" bindchange="onProbability" aria-label="发生概率，0 到 100" />
         <view class="row-between slider-labels"><text>0% 不会发生</text><text>100% 必然发生</text></view>
         <view wx:if="{{form.probability < 20}}" class="notice low-probability">低概率提醒：担心很真实，但它并不等于事实。</view>
       </view>

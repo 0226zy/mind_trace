@@ -13,16 +13,16 @@
         <view class="version-content">
           <view class="version-summary" data-index="{{index}}" bindtap="toggleVersion" role="button" aria-expanded="{{item.expanded}}">
             <view class="row-between"><view class="row"><text class="version-number">v{{item.versionNo || records.length - index}}</text><text class="tag tag-neutral">{{item.statusText}}</text></view><text class="expand-icon">{{item.expanded ? '−' : '+'}}</text></view>
-            <text class="list-meta">{{item.createdAtText}} · 强度 {{item.intensity}}</text>
+            <text class="list-meta">{{item.createdAtText}} · {{item.intensity > 0 ? '强度 ' + item.intensity : '强度未补充'}}</text>
             <view class="version-trigger wrap">{{item.triggerEvent}}</view>
           </view>
           <view wx:if="{{item.expanded}}" class="version-detail">
-            <view class="detail-field"><text class="field-label">当下情绪</text><text>{{item.emotionsText || '未记录'}}</text></view>
-            <view class="detail-field"><text class="field-label">循环念头</text><text class="wrap">{{item.loopThought}}</text></view>
+            <view class="detail-field"><text class="field-label">当下情绪</text><text>{{item.emotionsText || '未补充'}}</text></view>
+            <view class="detail-field"><text class="field-label">思虑正文</text><text class="wrap">{{item.loopThought}}</text></view>
             <view wx:if="{{item.inheritedFrom}}" class="inherit-line">这一版继承了上一版的评估内容，并按本次情况重新处理。</view>
             <block wx:if="{{item.status !== 'registered'}}">
               <view class="detail-field"><text class="field-label">判断</text><text>{{item.ruminationType || '未填写'}}</text></view>
-              <view class="detail-field"><text class="field-label">风险内容 · 概率 {{item.probability === undefined ? '—' : item.probability + '%'}}</text><text class="wrap">{{item.riskContent || '未填写'}}</text></view>
+              <view class="detail-field"><text class="field-label">风险内容 · 概率 {{item.probability === undefined || item.probability === null ? '—' : item.probability + '%'}}</text><text class="wrap">{{item.riskContent || '未填写'}}</text></view>
               <view class="detail-field" wx:if="{{item.actions.length}}"><text class="field-label">可控行动</text><view wx:for="{{item.actions}}" wx:for-item="action" wx:key="index" class="detail-list-item {{action.done ? 'strikethrough' : ''}}">{{action.done ? '✓' : '○'}} {{action.text}}</view></view>
               <view class="detail-field" wx:if="{{item.uncontrollables.length}}"><text class="field-label">不可控内容</text><view wx:for="{{item.uncontrollables}}" wx:for-item="entry" wx:key="index" class="detail-list-item {{entry.crossedOut ? 'strikethrough' : ''}}">{{entry.crossedOut ? '✓' : '○'}} {{entry.text}}</view></view>
               <view class="detail-field" wx:if="{{item.scenarioWorst || item.scenarioLikely || item.scenarioBest}}"><text class="field-label">三种视角</text><view class="perspective"><text>最坏</text><view class="wrap">{{item.scenarioWorst}}</view></view><view class="perspective"><text>最可能</text><view class="wrap">{{item.scenarioLikely}}</view></view><view class="perspective"><text>最好</text><view class="wrap">{{item.scenarioBest}}</view></view></view>

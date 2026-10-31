@@ -364,12 +364,26 @@ async function getRecord(openid, payload) {
 
 async function patchRecord(openid, payload) {
   const { id, updates } = normalizePatchRecord(payload);
+  const syncEmotions = Object.hasOwn(updates, 'emotions');
+  const snapshot = syncEmotions ? await getOwnedDocument('records', id, openid) : null;
+  if (syncEmotions && !snapshot) notFound();
   const record = await db.runTransaction(async (transaction) => {
+    let thought = null;
+    if (syncEmotions) {
+      // Match create/close lock order: thought before its record versions.
+      thought = await getOwnedDocument('thoughts', snapshot.thoughtId, openid, transaction);
+      if (!thought) notFound();
+    }
     const current = await getOwnedDocument('records', id, openid, transaction);
-    if (!current) notFound();
+    if (!current || (thought && current.thoughtId !== thought._id)) notFound();
     if (current.status === 'closed') conflict('closed records cannot be edited');
     const changes = { ...updates, updatedAt: nowISO() };
     await transaction.collection('records').doc(id).update({ data: changes });
+    if (thought && thought.latestRecordId === id) {
+      await transaction.collection('thoughts').doc(thought._id).update({
+        data: { emotions: updates.emotions, updatedAt: changes.updatedAt }
+      });
+    }
     return { ...current, ...changes };
   });
   return publicDoc(record);

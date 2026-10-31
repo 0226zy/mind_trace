@@ -37,7 +37,7 @@ mind_trace/
 │  ├─ internal/config/        # 环境变量与启动校验
 │  ├─ internal/models/        # GORM 模型与 JSON Scanner/Valuer
 │  ├─ internal/service/       # 鉴权、事务与领域服务
-│  └─ migrations/001_init.sql
+│  └─ migrations/            # 001 初始化；002 允许 intensity 为空
 ├─ web/src/
 │  ├─ api/                    # fetch 与管理端接口
 │  ├─ components/             # 指标卡、趋势图、状态块
@@ -129,22 +129,24 @@ Vue views → api/stores/utils/components；api 不依赖 views
 
 ### 3.1 `components/quick-note`
 
-组件属性只有 `visible`；内部阶段为：
+组件属性只有 `visible`，声明 `styleIsolation: shared` 以受控共享全局按钮和排版样式；内部阶段为：
 
 ```text
-edit → matching → match（有候选或可跳过匹配）→ saving → success
-                  └──────── 网络失败 → 本机 outbox → success
+edit → matching → match（有候选或可跳过匹配）→ saving → details → complete
+                  └──────── 网络失败 → 本机 outbox → details
 ```
 
-主要方法：
+`edit` 只包含一个正文 `textarea`；`details` 在正文创建或入队后补充情绪与强度；`complete` 才显示评估、返回和应急操作。主要方法：
 
 - `persistDraft()`：仅编辑阶段且代次有效时写速记草稿。
-- `submit()`：先 `validateQuick`，再确保登录并调用 `matchThoughts`。
+- `submit()`：先校验单正文，再确保登录并仅以该正文调用 `matchThoughts`。
 - `chooseSimilar(event)`：从 `item.thought.id/_id` 取 `thoughtId`。
 - `chooseNew()`：不传 `thoughtId`。
-- `createRecord(thoughtId)`：生成持久 `clientRequestId` 并创建。
+- `createRecord(thoughtId)`：通过 `buildQuickPayload` 生成短标题、完整正文、空情绪、空强度和持久 `clientRequestId` 并创建。
 - `saveOffline(existingPayload)`：网络失败入队；若创建阶段已经生成 ID，必须沿用。
-- `showSuccess()`：清除速记草稿、重置表单并发出 `saved`。
+- `showSuccess()`：清除速记草稿、保留本次结果并进入 `details`，同时发出 `saved` 刷新 dashboard。
+- `saveDetails()`：在线调用 `saveRecordDetails`；离线通过 `updateQueuedDetails` 只修改仍为 `queued` 的 payload，不改变幂等 ID或归属。
+- `resetAfterSaved()`：用户离开补充或完成阶段后清空本次表单与结果。
 - `resetSensitiveData(epoch)`：注销代次变化时清空表单、结果、候选、错误和草稿。
 
 父组件事件为 `close`、`saved`、`evaluate`、`emergency`。`saved.detail` 包含 `{result,offlineSaved}`；`evaluate.detail.id` 是服务端记录 ID。
@@ -157,13 +159,13 @@ edit → matching → match（有候选或可跳过匹配）→ saving → succe
 
 | 文件 | 导出／职责 |
 |---|---|
-| `validate.js` | `validateQuick`、`evaluationStepError(step,form)`、`buildEvaluationPayload(form,step)`；多行文本转 `{text,done}` 与 `{text,crossedOut}` |
+| `validate.js` | `validateQuick` 只校验单正文；`evaluationStepError(step,form)`、`buildEvaluationPayload(form,step)` 处理七步字段 |
 | `format.js` | 情绪枚举、状态中文、`normalizeRecord/Thought/ThoughtDetail`、趋势和百分比；兼容 `id/_id` 等响应形态 |
-| `offline.js` | 创建 `clientRequestId`，队列增改删，`canAutoSync`；不直接访问 storage |
+| `offline.js` | 创建 `clientRequestId`，队列增改删，`canAutoSync`；`withQueuedDetails` 仅允许修改 queued 项且不直接访问 storage |
 | `ownership.js` | `getUserId`、`ownershipBlock`、`reconcileQueueOwnership`；阻止缺归属、跨账号和跨后端 |
 | `backend.js` | `getBackendContext(config)`、`sameBackend`；cloud 默认环境规范化为 `default` |
 | `data-mode.js` | 只接受 `cloud/http`，选择对应传输，配置错误快速失败 |
-| `quick-state.js` | 速记空表单和删除代次重置对象，避免重置时遗漏敏感字段 |
+| `quick-state.js` | 空表单、`buildQuickPayload` 单正文载荷构造和删除代次重置对象，统一在线与离线创建语义 |
 
 `format.js` 的归一化只用于展示，不替代服务端字段约束，也不应成为持久化新数据模型的手段。
 
@@ -183,6 +185,7 @@ edit → matching → match（有候选或可跳过匹配）→ saving → succe
 | `records(params)` | `GET /records` | `listRecords` |
 | `record(id)` | `GET /records/:id` | `getRecord` |
 | `saveEvaluation(id,payload)` | `PATCH /records/:id` | `patchRecord` |
+| `saveRecordDetails(id,payload)` | `PATCH /records/:id` | `patchRecord` |
 | `closeRecord(id)` | `POST /records/:id/close` | `closeRecord` |
 | `pauseRecord(id)` | `POST /records/:id/pause` | `pauseRecord` |
 | `thoughts(params)` | `GET /thoughts` | `listThoughts` |
@@ -367,7 +370,7 @@ queued ─发送→ sending ─成功→ 移除
 - `Record`：`UserID` 不序列化；包含可选 `ClientRequestID`、版本号和全部七步字段。
 - `Emotions/Actions/UncontrollableItems/Confirmations` 实现 `driver.Valuer` 和 `sql.Scanner`，在 MySQL JSON 与 Go 类型之间转换。
 
-模型标签声明唯一键、外键、状态及范围 CHECK；`migrations/001_init.sql` 是对应 MySQL 8 初始化脚本。修改模型必须同步迁移与 `migration_test.go`，不能只改其中一个。
+模型标签声明唯一键、外键、状态及范围 CHECK；`Record.Intensity` 为 `*int`，区分未补充的 `null` 与合法数值。`migrations/001_init.sql` 用于 MySQL 8 新装，`002_allow_null_intensity.sql` 保留旧数据并升级既有库。修改模型必须同步迁移与 `migration_test.go`，不能只改其中一个。
 
 ### 7.4 service 模块
 
@@ -426,16 +429,22 @@ Go 与 cloud 的匹配主体相同，但当前 Go `Match` 的候选文本是思�
 
 ```text
 quick-note.submit
-  → validateQuick
+  → validateQuick（仅单正文）
   → auth.ensureLogin
   → api.matchThoughts → request → cloud/http
   → 用户选择 thoughtId 或新主题
-  → createRecord(payload + clientRequestId)
-       ├─ 成功：清速记草稿 → success → 刷新 dashboard
-       └─ network：sync.enqueue（保留同一 clientRequestId）→ success(offlineSaved)
+  → buildQuickPayload（短标题 + 完整正文 + emotions:[] + intensity:null + clientRequestId）
+  → createRecord(payload)
+       ├─ 成功：清速记草稿 → details → 刷新 dashboard
+       └─ network：sync.enqueue（保留同一 clientRequestId）→ details(offlineSaved)
+
+details → saveDetails
+       ├─ 在线：saveRecordDetails → PATCH emotions/intensity → complete
+       ├─ queued 离线项：updateQueuedDetails（同幂等 ID）→ complete
+       └─ sending/uncertain：拒绝覆盖并保留提示
 ```
 
-关键不变量：匹配不自动关联；只有网络错误走 outbox；离线成功不伪装成服务端记录；注销代次变化后忽略旧异步结果。
+关键不变量：匹配不自动关联；只有网络错误走 outbox；离线成功不伪装成服务端记录；补充失败不否认正文已保存；注销代次变化后忽略旧异步结果。
 
 ### 9.2 七步草稿与收尾
 

@@ -6,7 +6,7 @@ const offline = require('../utils/offline');
 const { normalizeRecord, normalizeThought, normalizeThoughtDetail, normalizeIntensityTrend, percent } = require('../utils/format');
 const { getUserId, ownershipBlock, reconcileQueueOwnership } = require('../utils/ownership');
 const { getBackendContext } = require('../utils/backend');
-const { deletionResetState } = require('../utils/quick-state');
+const { deletionResetState, buildQuickPayload } = require('../utils/quick-state');
 const { normalizeDataMode, selectTransport } = require('../utils/data-mode');
 const {
   mapCloudAction, attachActorUserId, unwrapCloudResult, buildCloudInitOptions, initializeCloud, cloudRequest
@@ -22,19 +22,33 @@ function test(name, fn) {
   });
 }
 
-const validQuick = { triggerEvent: '方案汇报', emotions: ['焦虑', '担忧'], intensity: 8, loopThought: '如果数据被质疑怎么办' };
+const validQuick = { triggerEvent: '', emotions: [], intensity: null, loopThought: '如果数据被质疑怎么办' };
 const cloudA = { backendMode: 'cloud', backendEnv: 'env-a' };
 const cloudB = { backendMode: 'cloud', backendEnv: 'env-b' };
 const httpA = { backendMode: 'http', backendEnv: 'https://api-a.example.com/api/v1' };
 const httpB = { backendMode: 'http', backendEnv: 'https://api-b.example.com/api/v1' };
 
-test('速记必填与长度校验', () => {
+test('速记第一步只校验思虑正文', () => {
   assert.strictEqual(validateQuick(validQuick), '');
-  assert.match(validateQuick(Object.assign({}, validQuick, { triggerEvent: '' })), /触发/);
-  assert.match(validateQuick(Object.assign({}, validQuick, { emotions: [] })), /情绪/);
-  assert.match(validateQuick(Object.assign({}, validQuick, { intensity: 11 })), /1–10/);
-  assert.match(validateQuick(Object.assign({}, validQuick, { triggerEvent: '一'.repeat(101) })), /100/);
+  assert.match(validateQuick(Object.assign({}, validQuick, { loopThought: '   ' })), /思虑/);
   assert.match(validateQuick(Object.assign({}, validQuick, { loopThought: '念'.repeat(1001) })), /1000/);
+});
+
+test('单正文创建载荷不伪造情绪强度并生成短标题', () => {
+  const payload = buildQuickPayload({ loopThought: '  如果汇报被质疑怎么办\n先核对数据  ' }, 'mini_1');
+  assert.deepStrictEqual(payload, {
+    triggerEvent: '如果汇报被质疑怎么办', emotions: [], intensity: null,
+    loopThought: '如果汇报被质疑怎么办\n先核对数据', clientRequestId: 'mini_1'
+  });
+  assert.strictEqual(Array.from(buildQuickPayload({ loopThought: `${'念'.repeat(120)}\n后续` }, 'mini_2').triggerEvent).length, 100);
+});
+
+test('仅 queued 离线记录可补充感受且保持幂等标识', () => {
+  const item = { clientRequestId: 'mini_1', syncState: 'queued', payload: { loopThought: '正文', clientRequestId: 'mini_1' } };
+  const queue = offline.withQueuedDetails([item], 'mini_1', { emotions: ['焦虑'], intensity: 6 });
+  assert.deepStrictEqual(queue[0].payload, { loopThought: '正文', clientRequestId: 'mini_1', emotions: ['焦虑'], intensity: 6 });
+  assert.strictEqual(item.payload.emotions, undefined);
+  assert.throws(() => offline.withQueuedDetails([Object.assign({}, item, { syncState: 'uncertain' })], 'mini_1', { emotions: [], intensity: 4 }), /已开始同步/);
 });
 
 test('七步逐步校验与三项确认', () => {
@@ -141,7 +155,8 @@ test('后端上下文区分 cloud 默认环境、指定环境与 HTTP API', () =
 test('注销代次重置清除速记表单、结果与草稿状态', () => {
   const state = deletionResetState(2);
   assert.strictEqual(state.deletionEpoch, 2);
-  assert.deepStrictEqual(state.form, { triggerEvent: '', emotions: [], intensity: 5, loopThought: '' });
+  assert.deepStrictEqual(state.form, { triggerEvent: '', emotions: [], intensity: null, loopThought: '' });
+  assert.strictEqual(state.canSubmit, false);
   assert.strictEqual(state.result, null);
   assert.deepStrictEqual(state.similarItems, []);
   assert.strictEqual(state.stage, 'edit');
@@ -185,11 +200,12 @@ test('统计 avgIntensity 与裸 thought 详情正确归一化', () => {
   assert.strictEqual(detail.records[0].expanded, true);
 });
 
-test('原生项目结构、touristappid 与页面文件完整', () => {
+test('原生项目结构、真实 AppID 与页面文件完整', () => {
   const root = path.resolve(__dirname, '..');
   const project = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8'));
   const app = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
-  assert.strictEqual(project.appid, 'touristappid');
+  assert.match(project.appid, /^wx[0-9a-f]{16}$/);
+  assert.notStrictEqual(project.appid, 'touristappid');
   assert.strictEqual(project.compileType, 'miniprogram');
   assert.strictEqual(app.tabBar.list.length, 3);
   assert.ok(project.packOptions.ignore.some((item) => item.type === 'folder' && item.value === 'scripts'), 'scripts 目录必须忽略上传');
@@ -308,7 +324,8 @@ test('云项目配置、默认模式与页面数据库隔离', () => {
   const config = require('../config');
   const project = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8'));
   assert.strictEqual(config.DATA_MODE, 'cloud');
-  assert.strictEqual(config.CLOUD_ENV, '');
+  assert.strictEqual(typeof config.CLOUD_ENV, 'string');
+  assert.ok(config.CLOUD_ENV.trim(), '必须显式配置云环境 ID');
   assert.strictEqual(config.CLOUD_FUNCTION_NAME, 'mindTrace');
   assert.ok(config.API_BASE);
   assert.strictEqual(project.cloudfunctionRoot, 'cloudfunctions/');

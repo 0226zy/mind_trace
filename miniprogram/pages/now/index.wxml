@@ -1,16 +1,17 @@
 <view class="page page-with-tab now-page">
   <view class="header">
-    <view class="header-copy"><text class="eyebrow">止念</text><view class="h1">先让念头停下来</view></view>
+    <view class="header-copy"><text class="eyebrow">止念</text><view class="h1">此刻</view></view>
     <button class="icon-text-btn" bindtap="goProfile" aria-label="我的与数据设置">我的</button>
   </view>
 
   <view class="breathing-space">
-    <text class="now-note">不必现在想明白</text>
+    <text class="now-note">不必现在想明白。</text>
     <button class="capture-btn" bindtap="openQuick">
-      <text class="capture-title">我陷入了一个思虑</text>
-      <text class="capture-subtitle">用 30 秒先记下来</text>
+      <text class="capture-title">记录思虑</text>
+      <text class="capture-subtitle">把脑海里的原话写下来</text>
+      <text class="capture-action">开始书写 →</text>
     </button>
-    <text class="privacy-note">只记录，不评判。稍后再处理也可以。</text>
+    <text class="privacy-note">只写正文，情绪与强度稍后再补充</text>
   </view>
 
   <view class="now-summary">
@@ -24,7 +25,7 @@
 
   <view class="emergency-entry">
     <view><view class="section-title">脑子停不下来？</view><text class="muted body-small">用 5 分钟感官落地，把注意力带回此刻。</text></view>
-    <button class="quiet-btn emergency-btn" bindtap="goEmergency">应急叫停</button>
+    <button class="text-btn emergency-btn" bindtap="goEmergency">应急叫停 →</button>
   </view>
 </view>
 <quick-note id="quick-note" visible="{{quickVisible}}" bind:close="closeQuick" bind:saved="onSaved" bind:evaluate="evaluateNow" bind:emergency="goEmergency" />

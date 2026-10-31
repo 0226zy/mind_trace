@@ -112,6 +112,12 @@ function flushQueue(user) {
   return flushing.finally(() => { flushing = null; });
 }
 
+function updateQueuedDetails(clientRequestId, details) {
+  const queue = offline.withQueuedDetails(getQueue(), clientRequestId, details);
+  saveQueue(queue);
+  return queue.find((item) => item.clientRequestId === clientRequestId);
+}
+
 function recoverInterruptedQueue() {
   const queue = getQueue();
   const recovered = queue.map((item) => item.syncState === 'sending' ? Object.assign({}, item, {
@@ -121,4 +127,4 @@ function recoverInterruptedQueue() {
   if (recovered.some((item, index) => item !== queue[index])) saveQueue(recovered);
 }
 
-module.exports = { getQueue, saveQueue, enqueue, patchItem, syncItem, flushQueue, recoverInterruptedQueue, reconcileAccount };
+module.exports = { getQueue, saveQueue, enqueue, patchItem, updateQueuedDetails, syncItem, flushQueue, recoverInterruptedQueue, reconcileAccount };
