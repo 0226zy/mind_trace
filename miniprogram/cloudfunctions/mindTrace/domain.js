@@ -451,6 +451,11 @@ function buildStats(thoughts, records, now = new Date()) {
   };
 }
 
+function withoutDocumentId(document) {
+  const { _id, ...data } = document;
+  return data;
+}
+
 module.exports = {
   AppError,
   RECURRING_VERSION_THRESHOLD,
@@ -464,6 +469,7 @@ module.exports = {
   assertActorUser,
   createUserWriteTouch,
   publicUser,
+  withoutDocumentId,
   emptyPayload,
   normalizeLogin,
   normalizeCreateRecord,

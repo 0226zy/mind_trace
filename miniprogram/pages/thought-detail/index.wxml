@@ -1,24 +1,23 @@
-<view class="page">
-  <state-view loading="{{loading}}" error="{{error}}" bind:retry="load" />
-  <block wx:if="{{!loading && !error && thought}}">
-    <text class="eyebrow">思虑点 · {{thought.versionCount}} 次登记</text>
+<view class="page thought-detail-page">
+  <state-view loading="{{loading && !thought}}" error="{{thought ? '' : error}}" bind:retry="load" />
+  <view wx:if="{{error && thought}}" class="inline-error"><text>暂未刷新，已保留当前内容</text><button class="text-btn" bindtap="load">重试</button></view>
+  <block wx:if="{{thought}}">
     <view class="h1 detail-title wrap">{{thought.title}}</view>
-    <view class="row detail-tags"><text class="tag">{{thought.statusText}}</text><text wx:if="{{thought.versionCount >= 3}}" class="tag tag-warm">高频思绪</text></view>
-    <view wx:if="{{thought.versionCount >= 3}}" class="notice detail-notice">这个主题已反复出现。可以关注它背后的共同模式，而不只处理单次事件。</view>
+    <view class="detail-meta">{{thought.statusText}} · 共 {{thought.versionCount}} 个版本</view>
+    <view wx:if="{{thought.versionCount >= 3}}" class="recurring-note">这个主题反复出现过，可以看看它们是否有共同之处。</view>
 
-    <view class="section-title timeline-title">版本时间线</view>
+    <view class="section-title timeline-title">记录版本</view>
     <view class="timeline">
       <view class="version" wx:for="{{records}}" wx:key="id">
         <view class="timeline-rail"><view class="timeline-dot {{item.status === 'closed' ? 'dot-closed' : ''}}"></view><view wx:if="{{index < records.length - 1}}" class="timeline-line"></view></view>
         <view class="version-content">
-          <view class="version-summary" data-index="{{index}}" bindtap="toggleVersion" role="button" aria-expanded="{{item.expanded}}">
-            <view class="row-between"><view class="row"><text class="version-number">v{{item.versionNo || records.length - index}}</text><text class="tag tag-neutral">{{item.statusText}}</text></view><text class="expand-icon">{{item.expanded ? '−' : '+'}}</text></view>
-            <text class="list-meta">{{item.createdAtText}} · {{item.intensity > 0 ? '强度 ' + item.intensity : '强度未补充'}}</text>
-            <view class="version-trigger wrap">{{item.triggerEvent}}</view>
+          <view class="version-summary" data-index="{{index}}" bindtap="toggleVersion" role="button" aria-expanded="{{item.expanded}}" aria-label="{{item.expanded ? '收起' : '展开'}} {{item.createdAtText}} 的记录">
+            <view><text class="version-number">第 {{item.versionNo || records.length - index}} 版</text><text class="version-time">{{item.createdAtText}}</text></view>
+            <view class="row-between version-state"><text>{{item.statusText}}</text><text class="expand-icon" aria-hidden="true">{{item.expanded ? '−' : '+'}}</text></view>
           </view>
           <view wx:if="{{item.expanded}}" class="version-detail">
-            <view class="detail-field"><text class="field-label">当下情绪</text><text>{{item.emotionsText || '未补充'}}</text></view>
-            <view class="detail-field"><text class="field-label">思虑正文</text><text class="wrap">{{item.loopThought}}</text></view>
+            <view class="detail-field thought-body"><text class="field-label">思虑正文</text><text class="wrap">{{item.loopThought}}</text></view>
+            <view class="detail-field feeling-field"><text class="field-label">当下感受</text><text>{{item.emotionsText || '情绪未补充'}} · {{item.intensity > 0 ? '强度 ' + item.intensity + '/10' : '强度未补充'}}</text></view>
             <view wx:if="{{item.inheritedFrom}}" class="inherit-line">这一版继承了上一版的评估内容，并按本次情况重新处理。</view>
             <block wx:if="{{item.status !== 'registered'}}">
               <view class="detail-field"><text class="field-label">判断</text><text>{{item.ruminationType || '未填写'}}</text></view>
@@ -27,7 +26,7 @@
               <view class="detail-field" wx:if="{{item.uncontrollables.length}}"><text class="field-label">不可控内容</text><view wx:for="{{item.uncontrollables}}" wx:for-item="entry" wx:key="index" class="detail-list-item {{entry.crossedOut ? 'strikethrough' : ''}}">{{entry.crossedOut ? '✓' : '○'}} {{entry.text}}</view></view>
               <view class="detail-field" wx:if="{{item.scenarioWorst || item.scenarioLikely || item.scenarioBest}}"><text class="field-label">三种视角</text><view class="perspective"><text>最坏</text><view class="wrap">{{item.scenarioWorst}}</view></view><view class="perspective"><text>最可能</text><view class="wrap">{{item.scenarioLikely}}</view></view><view class="perspective"><text>最好</text><view class="wrap">{{item.scenarioBest}}</view></view></view>
             </block>
-            <button class="secondary-btn full-btn version-action" data-id="{{item.id}}" bindtap="openEvaluation">{{item.status === 'closed' ? '查看完整处理结果' : '继续这次评估'}}</button>
+            <button class="secondary-btn full-btn version-action" data-id="{{item.id}}" bindtap="openEvaluation">{{item.status === 'closed' ? '查看完整处理结果' : item.status === 'registered' ? '开始评估' : '继续这次评估'}}</button>
           </view>
         </view>
       </view>

@@ -1,12 +1,13 @@
 const api = require('../../services/api');
 const auth = require('../../services/auth');
 const sync = require('../../services/sync');
+const config = require('../../config');
 
 Page({
-  data: { user: null, loading: true, error: '', pendingLocal: 0, deleteVisible: false, confirmText: '', deleting: false },
+  data: { user: null, loading: true, error: '', pendingLocal: 0, backendMode: config.DATA_MODE, deleteVisible: false, confirmText: '', deleting: false, deleteError: '' },
   onShow() { this.load(); },
   async load() {
-    this.setData({ loading: true, error: '', pendingLocal: sync.getQueue().length });
+    this.setData({ loading: !this.data.user, error: '', pendingLocal: sync.getQueue().length });
     try {
       await auth.ensureLogin();
       const user = await api.me();
@@ -20,13 +21,17 @@ Page({
   },
   goStats() { wx.navigateTo({ url: '/pages/stats/index' }); },
   goProcess() { wx.switchTab({ url: '/pages/process/index' }); },
-  showDelete() { this.setData({ deleteVisible: true, confirmText: '' }); },
-  hideDelete() { if (!this.data.deleting) this.setData({ deleteVisible: false, confirmText: '' }); },
-  onConfirmInput(event) { this.setData({ confirmText: event.detail.value }); },
+  checkLocalBeforeDelete() {
+    this.setData({ deleteVisible: false, confirmText: '' });
+    this.goProcess();
+  },
+  showDelete() { this.setData({ deleteVisible: true, confirmText: '', deleteError: '' }); },
+  hideDelete() { if (!this.data.deleting) this.setData({ deleteVisible: false, confirmText: '', deleteError: '' }); },
+  onConfirmInput(event) { this.setData({ confirmText: event.detail.value, deleteError: '' }); },
   stopTouch() {},
   async deleteAll() {
     if (this.data.confirmText !== '删除全部数据' || this.data.deleting) return;
-    this.setData({ deleting: true });
+    this.setData({ deleting: true, deleteError: '' });
     try {
       await auth.ensureLogin();
       await api.deleteMe();
@@ -39,8 +44,7 @@ Page({
       wx.showToast({ title: '全部数据已删除', icon: 'none' });
       setTimeout(() => wx.switchTab({ url: '/pages/now/index' }), 800);
     } catch (error) {
-      this.setData({ deleting: false });
-      wx.showToast({ title: error.message, icon: 'none' });
+      this.setData({ deleting: false, deleteError: error.message });
     }
   }
 });

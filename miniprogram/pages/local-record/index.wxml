@@ -1,16 +1,22 @@
-<view class="page">
+<view class="page local-record-page">
   <block wx:if="{{item}}">
-    <text class="eyebrow">仅保存在本机的登记</text><view class="h1 local-title wrap">{{item.payload.triggerEvent}}</view>
-    <view class="local-meta"><view class="row-between"><text class="tag tag-warm">{{item.syncStateText}}</text><text class="list-meta">{{item.createdAtText}}</text></view><view class="local-field"><text class="field-label">情绪与强度</text><text>{{item.emotionsText || '情绪未补充'}} · {{item.payload.intensity > 0 ? item.payload.intensity + '/10' : '强度未补充'}}</text></view><view class="local-field"><text class="field-label">思虑正文</text><text class="wrap">{{item.payload.loopThought}}</text></view></view>
-    <view wx:if="{{item.syncState === 'uncertain'}}" class="notice notice-warm local-notice">上次请求可能已到达服务端。自动同步已暂停，请先到思虑库确认，避免重复提交。</view>
-    <view wx:if="{{item.blockReason === 'accountChanged'}}" class="notice notice-warm local-notice">当前已是另一个内部用户账号。这条旧记录已停止同步并保留在本机，绝不会写入新账号。</view>
-    <view wx:if="{{item.blockReason === 'backendChanged'}}" class="notice notice-warm local-notice">当前后端模式或环境与登记时不同。这条记录已停止同步并保留在本机，绝不会跨环境重放。</view>
+    <text class="eyebrow">本机登记</text>
+    <view class="h1 local-title wrap">{{item.payload.triggerEvent}}</view>
+    <view class="local-status"><text>{{item.syncStateText}}</text><text>{{item.createdAtText}}</text></view>
+
+    <view class="local-field thought-field"><text class="field-label">思虑正文</text><text class="wrap">{{item.payload.loopThought}}</text></view>
+    <view class="local-field feeling-field"><text class="field-label">情绪与强度</text><text>{{item.emotionsText || '情绪未补充'}} · {{item.payload.intensity > 0 ? item.payload.intensity + '/10' : '强度未补充'}}</text></view>
+
+    <view wx:if="{{item.syncState === 'uncertain'}}" class="notice notice-warm local-notice">上次请求可能已到达服务端。自动同步已暂停，请先到思虑库核对，避免重复提交。</view>
+    <button wx:if="{{item.syncState === 'uncertain'}}" class="secondary-btn full-btn" bindtap="goLibrary">去思虑库核对</button>
+    <view wx:if="{{item.blockReason === 'accountChanged'}}" class="notice notice-warm local-notice">当前已是另一个内部用户账号。这条旧记录已停止同步并保留在本机，不会写入新账号。</view>
+    <view wx:if="{{item.blockReason === 'backendChanged'}}" class="notice notice-warm local-notice">当前后端模式或环境与登记时不同。这条记录已停止同步并保留在本机，不会跨环境重放。</view>
     <view wx:if="{{item.blockReason === 'backendMissing'}}" class="notice notice-warm local-notice">这条旧记录缺少后端归属信息，已停止同步并保留在本机。</view>
-    <view wx:if="{{item.errorMessage || error}}" class="error-text local-notice">{{error || item.errorMessage}}</view>
-    <button class="primary-btn full-btn local-action" bindtap="retrySync" disabled="{{syncing || !item.canRetry}}">{{syncing ? '正在同步…' : !item.canRetry ? item.retryBlockedText : item.syncState === 'uncertain' ? '确认后重试同步' : '同步这条登记'}}</button>
+    <view wx:if="{{item.errorMessage || error}}" class="error-text local-notice" role="alert">{{error || item.errorMessage}}</view>
+    <button class="primary-btn full-btn local-action" bindtap="retrySync" disabled="{{syncing || !item.canRetry}}">{{syncing ? '正在同步…' : !item.canRetry ? item.retryBlockedText : item.syncState === 'uncertain' ? '核对后重试同步' : '同步这条登记'}}</button>
     <button class="danger-btn full-btn" bindtap="removeLocal">删除本机登记</button>
-    <view class="id-note wrap">幂等标识：{{item.clientRequestId}}</view>
+    <text class="local-safety">同步异常不会自动删除本机原文。</text>
   </block>
-  <block wx:elif="{{syncedRecord}}"><view class="empty-space"><text class="empty-title">已同步到思虑库</text><text>本地待同步副本已移除。</text></view><button class="primary-btn full-btn" bindtap="evaluate">现在评估</button></block>
-  <view wx:else class="empty-space"><text class="empty-title">这条本地登记已不存在</text><text>它可能已完成同步。</text></view>
+  <block wx:elif="{{syncedRecord}}"><view class="empty-space"><text class="empty-title">已同步到思虑库</text><text>本机待同步副本已移除。</text></view><button class="primary-btn full-btn" bindtap="evaluate">现在评估</button><button class="text-btn full-btn" bindtap="goLibrary">去思虑库看看</button></block>
+  <view wx:else class="empty-space"><text class="empty-title">这条本机登记已不存在</text><text>它可能已完成同步。</text></view>
 </view>

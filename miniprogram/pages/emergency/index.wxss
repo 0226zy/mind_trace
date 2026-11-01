@@ -1,25 +1,31 @@
-.emergency-page { padding-bottom: calc(60rpx + env(safe-area-inset-bottom)); }
-.tool-tabs { display: flex; border-bottom: 1rpx solid #DDE2DB; margin-bottom: 42rpx; }
-.tool-tab { flex: 1; min-width: 0; min-height: 84rpx; border-radius: 0; border-bottom: 4rpx solid transparent; background: transparent; color: #737D76; font-size: 24rpx; padding: 10rpx 6rpx; }
-.tool-active { color: #294A45; border-bottom-color: #385C57; font-weight: 600; }
-.sense-panel { padding-top: 16rpx; }
-.sense-title { margin: 14rpx 0; font-size: 40rpx; line-height: 1.45; }
-.guidance-text { display: block; color: #737D76; font-size: 26rpx; margin-bottom: 36rpx; }
-.sense-input { display: flex; align-items: center; gap: 20rpx; min-height: 96rpx; background: #FDFDFB; border: 1rpx solid #D8DED7; border-radius: 12rpx; padding: 0 24rpx; margin-bottom: 18rpx; }
-.sense-index { color: #385C57; font-size: 26rpx; }
-.sense-input input { flex: 1; height: 94rpx; font-size: 28rpx; }
-.placeholder { color: #929A94; }
-.sense-error { margin-top: 24rpx; }
-.sense-actions { margin-top: 34rpx; }
-.sense-complete, .phrase-panel, .timer-panel { min-height: 650rpx; display: flex; flex-direction: column; justify-content: center; text-align: center; }
-.complete-symbol { color: #385C57; margin: 0 auto 30rpx; font-size: 52rpx; }
-.sense-complete .muted { margin-top: 20rpx; }
-.complete-actions { margin-top: 60rpx; }
-.phrase { font-size: 58rpx; font-weight: 500; line-height: 1.65; color: #303834; margin: 54rpx 0 34rpx; }
-.phrase-note, .timer-note { color: #737D76; font-size: 26rpx; line-height: 1.75; margin-bottom: 54rpx; }
-.timer-title { margin: 16rpx 0 20rpx; }
-.timer-clock { font-size: 104rpx; font-weight: 400; color: #385C57; font-variant-numeric: tabular-nums; letter-spacing: 4rpx; padding: 40rpx 0; }
-.timer-running { animation: quietPulse 3s ease-in-out infinite; }
-.timer-complete { margin-bottom: 28rpx; text-align: left; }
-.timer-btn { margin-bottom: 12rpx; }
-@keyframes quietPulse { 0%,100% { opacity: .72; } 50% { opacity: 1; } }
+.emergency-page { padding: 48rpx 32rpx calc(48rpx + env(safe-area-inset-bottom)); }
+.tool-home { padding-top: 32rpx; }
+.tool-intro { display: block; margin-top: 20rpx; color: #656D63; font-size: 28rpx; line-height: 1.65; }
+.tool-list { margin-top: 56rpx; border-top: 1px solid #E3E3DD; }
+.tool-choice { width: 100%; min-height: 104rpx; padding: 24rpx 0; border-bottom: 1px solid #E3E3DD; border-radius: 0; background: transparent; color: #242824; display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: 30rpx; font-weight: 500; line-height: 1.5; }
+.tool-choice.button-hover { background: #E9ECE5; }
+.tool-arrow { color: #385C57; font-weight: 400; padding-left: 24rpx; }
+.tool-header { min-height: 88rpx; margin-bottom: 32rpx; border-bottom: 1px solid #E3E3DD; display: flex; align-items: center; justify-content: space-between; gap: 16rpx; }
+.tool-back { min-width: 176rpx; min-height: 88rpx; margin: 0; padding: 16rpx 16rpx 16rpx 0; background: transparent; color: #385C57; font-size: 26rpx; text-align: left; }
+.tool-name { color: #656D63; font-size: 24rpx; text-align: right; }
+.step-meta { display: block; color: #656D63; font-size: 24rpx; line-height: 1.5; }
+.sense-title { margin: 16rpx 0; font-size: 40rpx; }
+.guidance-text { display: block; color: #656D63; font-size: 27rpx; line-height: 1.65; margin-bottom: 32rpx; }
+.sense-input { display: flex; align-items: center; gap: 20rpx; min-height: 96rpx; border-bottom: 1px solid #E3E3DD; }
+.sense-index { width: 36rpx; flex-shrink: 0; color: #385C57; font-size: 25rpx; font-variant-numeric: tabular-nums; }
+.sense-input input { flex: 1; min-width: 0; height: 94rpx; font-size: 28rpx; }
+.placeholder { color: #656D63; }
+.sense-error { margin: 24rpx 0 0; }
+.sense-actions { margin-top: 40rpx; }
+.complete-panel { padding: 112rpx 0 64rpx; text-align: center; }
+.complete-return { margin-top: 56rpx; }
+.phrase-panel { padding-top: 32rpx; text-align: center; }
+.phrase { margin: 64rpx 0 32rpx; color: #242824; font-size: 60rpx; font-weight: 500; line-height: 1.6; }
+.phrase-note, .timer-note { display: block; color: #656D63; font-size: 27rpx; line-height: 1.7; }
+.phrase-note { margin-bottom: 48rpx; }
+.timer-panel { padding-top: 48rpx; text-align: center; }
+.timer-note { text-align: left; }
+.timer-clock { padding: 64rpx 0 56rpx; color: #385C57; font-size: 112rpx; font-weight: 400; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: 4rpx; }
+.timer-btn { margin-bottom: 8rpx; }
+.emergency-exit { width: 100%; min-height: 88rpx; margin-top: 24rpx; padding: 16rpx; background: transparent; color: #656D63; font-size: 26rpx; }
+.emergency-exit.button-hover, .tool-back.button-hover { opacity: .65; }

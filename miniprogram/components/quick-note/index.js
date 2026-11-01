@@ -123,7 +123,7 @@ Component({
     chooseNew() { this.createRecord(); },
     async createRecord(thoughtId) {
       if (!this.ensureActiveEpoch() || (this.data.submitting && this.data.stage === 'saving')) return;
-      this.setData({ submitting: true, stage: 'saving', error: '' });
+      this.setData({ submitting: true, stage: 'saving', error: '', matchError: '' });
       const payload = buildQuickPayload(this.data.form, offline.createClientRequestId());
       if (thoughtId) payload.thoughtId = thoughtId;
       try {
@@ -150,16 +150,26 @@ Component({
       this.triggerEvent('saved', { result, offlineSaved });
     },
     async saveDetails() {
+      await this.finishDetails(false);
+    },
+    async evaluateWithDetails() {
+      await this.finishDetails(true);
+    },
+    async finishDetails(shouldEvaluate) {
       if (!this.ensureActiveEpoch() || this.data.submitting) return;
       const details = { emotions: this.data.form.emotions.slice(), intensity: this.data.form.intensity };
-      if (!details.emotions.length && details.intensity === null) { this.close(); return; }
+      if (!details.emotions.length && details.intensity === null) {
+        if (shouldEvaluate) this.evaluateNow();
+        else this.close();
+        return;
+      }
       this.setData({ submitting: true, error: '' });
       try {
         if (this.data.offlineSaved) {
           const localRecord = this.data.result && this.data.result.localRecord;
           if (!localRecord) throw new Error('这条本地记录已不存在');
           const updated = sync.updateQueuedDetails(localRecord.clientRequestId, details);
-          this.setData({ stage: 'complete', result: { localRecord: updated }, submitting: false });
+          this.setData({ result: { localRecord: updated }, submitting: false });
         } else {
           await auth.ensureLogin();
           if (!this.ensureActiveEpoch()) return;
@@ -168,11 +178,13 @@ Component({
           if (!id) throw new Error('记录编号缺失，请稍后在处理页补充');
           const record = await api.saveRecordDetails(id, details);
           if (!this.ensureActiveEpoch()) return;
-          this.setData({ stage: 'complete', result: Object.assign({}, this.data.result, { record }), submitting: false });
+          this.setData({ result: Object.assign({}, this.data.result, { record }), submitting: false });
         }
+        if (shouldEvaluate) this.evaluateNow();
+        else this.close();
       } catch (error) {
         if (!this.ensureActiveEpoch()) return;
-        this.setData({ submitting: false, error: error.network ? '感受尚未保存，请检查网络后重试；正文已安全记录。' : error.message });
+        this.setData({ submitting: false, error: error.network ? '感受尚未保存，请检查网络后重试；正文已记录。' : error.message });
       }
     },
     later() { this.close(); },

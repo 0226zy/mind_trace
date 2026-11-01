@@ -123,7 +123,7 @@ Vue views → api/stores/utils/components；api 不依赖 views
 | `pages/stats/index.js` | `load` | 将对象或数组形式的情绪计数归一化，计算条形宽度；趋势只渲染接口已返回日期 |
 | `pages/profile/index.js` | `load/deleteAll` | 输入“删除全部数据”后调用 `deleteMe`；成功才清 session、`wx.clearStorageSync()` 并递增代次 |
 
-页面共同通过 `state-view` 表达 `loading/error/empty`。页面不能引入 `wx-server-sdk`、直接查询云集合或拼接 SQL。
+页面共同通过 `state-view` 表达 `loading/error/empty`，其中加载与空态使用 `role="status"`，错误使用 `role="alert"`，装饰性加载环对读屏隐藏。处理、思虑库、详情、统计和我的页面在已有数据时返回刷新不清空旧内容，也不显示全屏加载；刷新失败通过 `.inline-error` 就地提示并保留旧数据。`app.wxss` 的 `--color-*`、`--space-*`、`--radius-*`、`--font-*`、`--motion-*` 是共享视觉令牌，页面和 `styleIsolation: shared` 的组件应优先复用。书写与评估错误区域预留单行高度，选中态不改变内边距。页面不能引入 `wx-server-sdk`、直接查询云集合或拼接 SQL。
 
 ## 3. 小程序组件与工具函数
 

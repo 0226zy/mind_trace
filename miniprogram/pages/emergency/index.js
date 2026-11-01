@@ -7,7 +7,7 @@ function clock(seconds) {
 
 Page({
   data: {
-    tool: 'senses', senseStep: 0, senseValues: [[], [], []], senseError: '', sensesDone: false,
+    tool: '', senseStep: 0, senseValues: [[], [], []], senseError: '', sensesDone: false,
     sensePrompts: [
       { title: '看见 5 样东西', hint: '慢慢说出它们的名字，不必评价。', count: 5, placeholders: ['例如：窗户', '例如：桌上的杯子', '例如：一本书', '例如：墙上的影子', '例如：自己的双手'] },
       { title: '听见 4 种声音', hint: '只辨认声音，让注意力停在当下。', count: 4, placeholders: ['例如：空调声', '例如：脚步声', '例如：车流声', '例如：自己的呼吸'] },

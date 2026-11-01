@@ -2,86 +2,78 @@
   <view class="sheet" catchtap="stopTouch" role="dialog" aria-label="记录思虑">
     <block wx:if="{{stage === 'edit'}}">
       <view class="sheet-topbar">
-        <text class="eyebrow">记录思虑</text>
-        <button class="close-btn" bindtap="close" aria-label="关闭并保留草稿">×</button>
+        <button class="topbar-action" bindtap="close" aria-label="关闭并保留草稿">关闭</button>
+        <text class="topbar-title">记录思虑</text>
+        <text class="topbar-spacer" aria-hidden="true"></text>
       </view>
       <scroll-view scroll-y class="writing-scroll" enhanced show-scrollbar="{{false}}">
         <view class="writing-heading">
-          <view class="h1">此刻，脑海里反复出现的是什么？</view>
-          <text class="writing-subtitle">先写下来，不用整理，也不用评判。</text>
+          <view class="h1">此刻在想什么？</view>
+          <text class="writing-subtitle">写下来就好。</text>
         </view>
         <view wx:if="{{restored}}" class="restore-note">已恢复上次未提交的草稿</view>
-        <textarea class="writing-input" auto-height focus="{{visible}}" adjust-position cursor-spacing="24" show-confirm-bar="{{false}}" maxlength="1000" value="{{form.loopThought}}" data-field="loopThought" bindinput="onInput" placeholder="把脑海里的原话写在这里……" placeholder-class="placeholder" aria-label="思虑正文" />
+        <textarea class="writing-input" auto-height focus="{{visible}}" adjust-position cursor-spacing="24" show-confirm-bar="{{false}}" maxlength="1000" value="{{form.loopThought}}" data-field="loopThought" bindinput="onInput" placeholder="不用整理，也不用评判……" placeholder-class="placeholder" aria-label="思虑正文" />
       </scroll-view>
       <view class="sheet-footer">
-        <view wx:if="{{error}}" class="error-text" role="alert">{{error}}</view>
+        <view class="error-text form-error {{error ? 'is-visible' : ''}}" role="alert" aria-hidden="{{!error}}">{{error}}</view>
         <button class="primary-btn full-btn" disabled="{{!canSubmit}}" loading="{{submitting}}" bindtap="submit">写好了</button>
-        <text class="local-hint">未提交内容会作为草稿留在本机</text>
+        <view class="footer-meta"><text>未提交内容会保留在本机</text><button class="footer-emergency" bindtap="emergency">我需要先叫停</button></view>
       </view>
     </block>
 
     <view wx:elif="{{stage === 'matching' || stage === 'saving'}}" class="processing-state">
       <view class="processing-line"></view>
-      <text class="empty-title">{{stage === 'matching' ? '正在安放这条思虑' : '正在保存'}}</text>
-      <text>内容仍会保留，请稍等片刻。</text>
+      <text class="empty-title">{{stage === 'matching' ? '正在检查相似内容' : '正在保存'}}</text>
+      <text>正文仍会保留，请稍等片刻。</text>
     </view>
 
     <block wx:elif="{{stage === 'match'}}">
-      <view class="sheet-topbar"><text class="eyebrow">保存前确认</text></view>
-      <view class="match-heading"><view class="h2">这可能是旧念复发</view><text>只会提示，不会自动合并。</text></view>
+      <view class="sheet-topbar"><text class="topbar-title">保存前确认</text></view>
+      <view class="match-heading"><view class="h2">这可能是同一件事</view><text>只是内容相似，由你决定是否关联。</text></view>
       <scroll-view scroll-y class="match-scroll" enhanced show-scrollbar="{{false}}">
-        <view wx:for="{{similarItems}}" wx:key="index" class="similar-item" data-index="{{index}}" bindtap="chooseSimilar" role="button">
-          <view class="row-between"><text class="similar-title wrap">{{item.thought.title || '相似思虑'}}</text><text class="tag">关联为 v{{(item.thought.versionCount || 1) + 1}}</text></view>
-          <text class="list-meta">已登记 {{item.thought.versionCount || 1}} 次 · 相似度 {{item.score <= 1 ? item.score * 100 : item.score}}%</text>
-          <view class="similar-action">关联为新版本 →</view>
-        </view>
+        <button wx:for="{{similarItems}}" wx:key="index" class="similar-item" data-index="{{index}}" bindtap="chooseSimilar">
+          <text class="similar-title wrap">{{item.thought.title || '相似思虑'}}</text>
+          <text class="list-meta">之前记录过 {{item.thought.versionCount || 1}} 次</text>
+          <text class="similar-action">关联这次记录 →</text>
+        </button>
         <view wx:if="{{matchError}}" class="notice match-notice">{{matchError}}</view>
-        <view wx:if="{{error}}" class="error-text">{{error}}</view>
+        <view wx:if="{{error && !matchError}}" class="error-text">{{error}}</view>
       </scroll-view>
       <view class="sheet-footer">
-        <button class="primary-btn full-btn" bindtap="chooseNew">作为新思虑保存</button>
+        <button class="secondary-btn full-btn" bindtap="chooseNew">都不是，保存为新思虑</button>
         <button class="text-btn full-btn" bindtap="resetFeedback">返回修改正文</button>
       </view>
     </block>
 
     <block wx:elif="{{stage === 'details'}}">
       <view class="sheet-topbar">
-        <text class="eyebrow">正文已记录</text>
-        <button class="close-btn" bindtap="close" aria-label="稍后补充并关闭">×</button>
+        <text class="topbar-title">已经记下</text>
+        <button class="topbar-action topbar-close" bindtap="close" aria-label="回到此刻">关闭</button>
       </view>
       <scroll-view scroll-y class="details-scroll" enhanced show-scrollbar="{{false}}">
-        <view class="details-heading"><view class="h1">此刻，它让你有什么感受？</view><text>可以补充，也可以留到以后。</text></view>
+        <view class="details-heading"><view class="h1">已经记下</view><text>可以补充感受，也可以回到此刻。</text></view>
         <view class="detail-section">
-          <text class="detail-label">情绪</text>
+          <text class="detail-label">此刻的感受</text>
+          <text class="detail-hint">可多选，也可留空</text>
           <view class="emotion-options">
             <button wx:for="{{emotionOptions}}" wx:key="name" class="emotion-option {{item.selected ? 'emotion-selected' : ''}}" data-emotion="{{item.name}}" bindtap="toggleEmotion" aria-pressed="{{item.selected}}">{{item.name}}</button>
           </view>
         </view>
         <view class="detail-section intensity-section">
-          <view class="row-between"><text class="detail-label">强度</text><text class="intensity-current">{{form.intensity === null ? '未选择' : form.intensity + ' / 10'}}</text></view>
+          <view class="row-between"><text class="detail-label">强烈程度</text><text class="intensity-current">{{form.intensity === null ? '未补充' : form.intensity + ' / 10'}}</text></view>
           <view class="intensity-options">
-            <button wx:for="{{intensityOptions}}" wx:key="value" class="intensity-option {{item.value === form.intensity ? 'intensity-selected' : ''}}" data-value="{{item.value}}" bindtap="onIntensity" aria-pressed="{{item.value === form.intensity}}">{{item.label}}</button>
+            <button wx:for="{{intensityOptions}}" wx:key="value" class="intensity-option {{item.value === form.intensity ? 'intensity-selected' : ''}}" data-value="{{item.value}}" bindtap="onIntensity" aria-label="强度 {{item.value}}，{{item.label}}" aria-pressed="{{item.value === form.intensity}}">{{item.value}}</button>
           </view>
-          <text class="detail-hint">选择最接近此刻感受的一项</text>
+          <text class="detail-hint">未补充时不计入强度统计</text>
         </view>
-        <view wx:if="{{offlineSaved}}" class="notice">当前离线。若正文尚未开始同步，感受会随正文一并保存。</view>
+        <view wx:if="{{offlineSaved}}" class="notice">已保存在本机，联网后可同步。若正文尚未开始同步，感受会随正文一并保存。</view>
         <view wx:if="{{error}}" class="error-text detail-error" role="alert">{{error}}</view>
       </scroll-view>
       <view class="sheet-footer">
-        <button class="primary-btn full-btn" loading="{{submitting}}" bindtap="saveDetails">完成</button>
-        <button class="text-btn full-btn" bindtap="later">暂不补充</button>
+        <button class="primary-btn full-btn" loading="{{submitting}}" bindtap="saveDetails">回到此刻</button>
+        <button wx:if="{{!offlineSaved}}" class="text-btn full-btn" bindtap="evaluateWithDetails" disabled="{{submitting}}">现在评估</button>
+        <button class="footer-emergency details-emergency" bindtap="emergency" disabled="{{submitting}}">我需要先叫停</button>
       </view>
     </block>
-
-    <view wx:else class="complete-state">
-      <text class="complete-mark" aria-hidden="true">✓</text>
-      <view class="h1">这条思虑已安放好</view>
-      <text class="complete-copy">不必现在想明白。需要时，再慢慢看清它。</text>
-      <view class="complete-actions">
-        <button wx:if="{{!offlineSaved}}" class="primary-btn full-btn" bindtap="evaluateNow">现在评估</button>
-        <button class="secondary-btn full-btn" bindtap="later">回到此刻</button>
-        <button class="text-btn full-btn" bindtap="emergency">我需要先叫停</button>
-      </view>
-    </view>
   </view>
 </view>

@@ -7,7 +7,7 @@ Page({
   onLoad(options) { this.thoughtId = decodeURIComponent(options.id || ''); },
   onShow() { if (this.thoughtId) this.load(); },
   async load() {
-    this.setData({ loading: true, error: '' });
+    this.setData({ loading: !this.data.thought, error: '' });
     try {
       await auth.ensureLogin();
       const result = await api.thought(this.thoughtId);

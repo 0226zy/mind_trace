@@ -1,31 +1,31 @@
 <view class="page page-with-tab now-page">
-  <view class="header">
-    <view class="header-copy"><text class="eyebrow">止念</text><view class="h1">此刻</view></view>
+  <view class="now-header">
+    <text class="brand">止念</text>
     <button class="icon-text-btn" bindtap="goProfile" aria-label="我的与数据设置">我的</button>
   </view>
 
-  <view class="breathing-space">
-    <text class="now-note">不必现在想明白。</text>
-    <button class="capture-btn" bindtap="openQuick">
-      <text class="capture-title">记录思虑</text>
-      <text class="capture-subtitle">把脑海里的原话写下来</text>
-      <text class="capture-action">开始书写 →</text>
-    </button>
+  <view class="now-hero">
+    <view class="h1">把念头先放在这里。</view>
+    <text class="now-note">不需要现在想明白。</text>
+    <button class="primary-btn full-btn capture-btn" bindtap="openQuick" aria-label="记录思虑，只写正文">记录思虑</button>
     <text class="privacy-note">只写正文，情绪与强度稍后再补充</text>
   </view>
 
-  <view class="now-summary">
-    <state-view loading="{{loading}}" error="{{error}}" bind:retry="loadDashboard" />
-    <block wx:if="{{loaded && !error}}">
-      <view class="summary-line"><text>今日已登记</text><text class="summary-number">{{dashboard.todayCount || 0}} 条</text></view>
-      <view class="summary-line"><text>等待处理</text><text class="summary-number">{{dashboard.pendingCount || 0}} 条</text></view>
-      <button wx:if="{{dashboard.pendingCount}}" class="text-btn process-link" bindtap="goProcess">平静时，去处理队列 →</button>
-    </block>
+  <view class="now-summary" aria-live="polite">
+    <button wx:if="{{loaded && !error && dashboard.thoughtCount}}" class="summary-line" bindtap="goProcess" aria-label="今日登记 {{dashboard.todayCount || 0}} 条，待处理 {{dashboard.pendingCount || 0}} 条，进入处理页">
+      <text>今日登记 {{dashboard.todayCount || 0}} · 待处理 {{dashboard.pendingCount || 0}}</text>
+      <text class="summary-arrow" aria-hidden="true">›</text>
+    </button>
+    <text wx:elif="{{loaded && !error}}" class="first-use-note">写下来，就可以先放下。</text>
+    <view wx:elif="{{error}}" class="summary-error">
+      <text>统计暂未更新，不影响记录</text>
+      <button class="text-btn" bindtap="loadDashboard">重试</button>
+    </view>
   </view>
 
-  <view class="emergency-entry">
-    <view><view class="section-title">脑子停不下来？</view><text class="muted body-small">用 5 分钟感官落地，把注意力带回此刻。</text></view>
-    <button class="text-btn emergency-btn" bindtap="goEmergency">应急叫停 →</button>
-  </view>
+  <button class="emergency-entry" bindtap="goEmergency">
+    <text>此刻很难受？先叫停</text>
+    <text class="summary-arrow" aria-hidden="true">›</text>
+  </button>
 </view>
 <quick-note id="quick-note" visible="{{quickVisible}}" bind:close="closeQuick" bind:saved="onSaved" bind:evaluate="evaluateNow" bind:emergency="goEmergency" />

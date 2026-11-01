@@ -1,17 +1,20 @@
-.offline-panel { border-top: 1rpx solid #DDE2DB; border-bottom: 1rpx solid #DDE2DB; padding: 26rpx 0 12rpx; margin-bottom: 32rpx; }
-.offline-title { font-weight: 600; font-size: 28rpx; }
-.account-warning { margin-top: 22rpx; }
-.local-item { border-top: 1rpx solid #E1E4DE; padding: 24rpx 0; margin-top: 22rpx; }
-.local-item .list-meta { display: block; margin-top: 12rpx; }
-.local-item-title { font-size: 27rpx; max-width: 70%; }
-.segmented { display: flex; border-bottom: 1rpx solid #DDE2DB; margin-bottom: 12rpx; }
-.segment { flex: 1; min-height: 84rpx; background: transparent; color: #737D76; border-radius: 0; border-bottom: 4rpx solid transparent; font-size: 27rpx; }
-.segment-active { color: #294A45; border-bottom-color: #385C57; font-weight: 600; }
-.record-list { padding-bottom: 30rpx; }
-.record-item { padding: 32rpx 0 34rpx; border-bottom: 1rpx solid #E1E4DE; }
-.record-trigger { font-size: 32rpx; font-weight: 600; line-height: 1.55; margin-top: 20rpx; }
-.record-thought { color: #69736E; font-size: 27rpx; margin-top: 12rpx; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
-.record-footer { margin-top: 24rpx; align-items: flex-end; }
-.record-footer .list-meta { max-width: 64%; }
-.open-text { color: #385C57; font-size: 25rpx; flex-shrink: 0; }
-.record-item .progress-track { margin-top: 24rpx; }
+.page-with-tab { padding-left: 32rpx; padding-right: 32rpx; background: #F7F6F2; color: #242824; }
+.header { margin-bottom: 24rpx; }
+.header .h1 { font-size: 40rpx; line-height: 1.4; }
+.offline-summary { width: 100%; min-height: 88rpx; margin: 0 0 24rpx; padding: 16rpx 0; display: flex; align-items: center; justify-content: space-between; gap: 24rpx; border-bottom: 1px solid #E3E3DD; border-radius: 0; background: transparent; color: #656D63; text-align: left; font-size: 26rpx; line-height: 1.5; transition: background-color 200ms ease, opacity 200ms ease; }
+.offline-summary.button-hover { background: #E9ECE5; }
+.summary-arrow { color: #385C57; font-size: 36rpx; line-height: 1; }
+.segmented { display: flex; border-bottom: 1px solid #E3E3DD; margin-bottom: 8rpx; }
+.segment { flex: 1; min-height: 88rpx; margin: 0; padding: 16rpx; background: transparent; color: #656D63; border-radius: 0; border-bottom: 2px solid transparent; font-size: 28rpx; line-height: 1.5; transition: color 200ms ease, border-color 200ms ease, background-color 200ms ease; }
+.segment-active { color: #242824; border-bottom-color: #385C57; font-weight: 600; }
+.empty-link { min-height: 88rpx; margin: -32rpx auto 40rpx; padding: 16rpx 24rpx; display: flex; align-items: center; justify-content: center; color: #385C57; font-size: 28rpx; }
+.record-list { padding-bottom: 32rpx; }
+.record-item { padding: 32rpx 0; border-bottom: 1px solid #E3E3DD; transition: background-color 200ms ease, opacity 200ms ease; }
+.next-record { margin: 24rpx 0 8rpx; padding: 32rpx; border: 1px solid #E3E3DD; border-radius: 16rpx; background: #FCFCFA; }
+.next-label { display: block; margin-bottom: 16rpx; color: #385C57; font-size: 24rpx; font-weight: 500; line-height: 1.4; }
+.record-trigger { color: #242824; font-size: 32rpx; font-weight: 600; line-height: 1.6; }
+.record-thought { margin-top: 12rpx; color: #656D63; font-size: 27rpx; line-height: 1.6; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.record-status { display: block; margin-top: 16rpx; color: #656D63; font-size: 24rpx; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.open-text { min-height: 88rpx; margin-top: 8rpx; display: inline-flex; align-items: center; gap: 12rpx; color: #385C57; font-size: 28rpx; font-weight: 500; line-height: 1.5; }
+.open-arrow { font-weight: 400; }
+.inline-error { border-color: #E3E3DD; }

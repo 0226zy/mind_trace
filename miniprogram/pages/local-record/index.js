@@ -52,6 +52,7 @@ Page({
     sync.saveQueue(sync.getQueue().filter((item) => item.clientRequestId !== this.clientRequestId));
     wx.navigateBack();
   },
+  goLibrary() { wx.switchTab({ url: '/pages/library/index' }); },
   evaluate() {
     const record = this.data.syncedRecord;
     if (record) wx.redirectTo({ url: `/pages/evaluate/index?id=${encodeURIComponent(record.id || record._id)}` });

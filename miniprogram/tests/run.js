@@ -340,6 +340,91 @@ test('云项目配置、默认模式与页面数据库隔离', () => {
   });
 });
 
+test('安静视觉系统使用语义令牌并保持内容优先', () => {
+  const root = path.resolve(__dirname, '..');
+  const style = fs.readFileSync(path.join(root, 'app.wxss'), 'utf8');
+  ['--color-bg', '--color-text', '--color-muted', '--color-line', '--color-accent', '--space-4', '--radius-m', '--font-title', '--font-body', '--font-meta', '--motion-fast'].forEach((token) => assert.ok(style.includes(token), `缺少设计令牌 ${token}`));
+  const now = fs.readFileSync(path.join(root, 'pages/now/index.wxml'), 'utf8');
+  assert.strictEqual((now.match(/class="primary-btn/g) || []).length, 1, '首页只能有一个主按钮');
+  assert.ok(now.includes('把念头先放在这里。') && now.includes('capture-btn'), '首页聚焦记录入口');
+  const quick = fs.readFileSync(path.join(root, 'components/quick-note/index.wxml'), 'utf8');
+  assert.ok(!quick.includes('相似度'), '相似候选不显示相似度百分比');
+  assert.ok(quick.indexOf('bindtap="saveDetails">回到此刻') < quick.indexOf('bindtap="evaluateWithDetails"'), '回到此刻应先于现在评估');
+  const library = fs.readFileSync(path.join(root, 'pages/library/index.wxml'), 'utf8');
+  assert.ok(library.indexOf('thought-title') < library.indexOf('thought-meta'), '思虑库标题应先于状态元信息');
+  assert.ok(library.includes('已加载内容中显示 '), '本地筛选必须说明结果范围');
+  const evaluate = fs.readFileSync(path.join(root, 'pages/evaluate/index.wxml'), 'utf8');
+  assert.ok(!evaluate.includes('class="card readonly-card"'), '只读结果不使用连续卡片堆叠');
+  assert.ok(!evaluate.includes('bindtap="{{'), '事件处理函数必须静态绑定');
+  const local = fs.readFileSync(path.join(root, 'pages/local-record/index.wxml'), 'utf8');
+  assert.ok(!local.includes('{{item.clientRequestId}}'), '普通界面不展示完整技术幂等标识');
+});
+
+test('刷新保留旧内容且错误与选中态不造成布局跳动', () => {
+  const root = path.resolve(__dirname, '..');
+  const expectations = [
+    ['pages/process/index.js', 'loading: !this.data.records.length'],
+    ['pages/library/index.js', 'loading: !this.data.items.length'],
+    ['pages/thought-detail/index.js', 'loading: !this.data.thought'],
+    ['pages/stats/index.js', 'loading: !this.data.stats'],
+    ['pages/profile/index.js', 'loading: !this.data.user']
+  ];
+  expectations.forEach(([file, source]) => assert.ok(fs.readFileSync(path.join(root, file), 'utf8').includes(source), `${file} 返回刷新不应清空旧内容`));
+  ['pages/process/index.wxml', 'pages/library/index.wxml', 'pages/thought-detail/index.wxml', 'pages/stats/index.wxml'].forEach((file) => assert.ok(fs.readFileSync(path.join(root, file), 'utf8').includes('inline-error'), `${file} 缺少保留内容时的就地错误`));
+  const quick = fs.readFileSync(path.join(root, 'components/quick-note/index.wxml'), 'utf8');
+  assert.ok(quick.includes('form-error') && quick.includes('aria-hidden="{{!error}}"'));
+  const evaluate = fs.readFileSync(path.join(root, 'pages/evaluate/index.wxml'), 'utf8');
+  assert.ok(!evaluate.includes('wx:if="{{stepError}}"'));
+  const state = fs.readFileSync(path.join(root, 'components/state-view/index.wxml'), 'utf8');
+  assert.ok(state.includes('role="alert"') && state.includes('role="status"') && state.includes('aria-hidden="true"'));
+});
+
+test('保存感受后可直接回到此刻或进入评估', async () => {
+  const api = require('../services/api');
+  const auth = require('../services/auth');
+  const original = { api: api.saveRecordDetails, login: auth.ensureLogin, wx: global.wx, app: global.getApp, component: global.Component };
+  let definition;
+  const events = [];
+  global.wx = { removeStorageSync() {}, setStorageSync() {} };
+  global.getApp = () => ({ globalData: { deletionEpoch: 0 } });
+  global.Component = (value) => { definition = value; };
+  try {
+    require('../components/quick-note/index');
+    function instance() {
+      const target = Object.assign({}, definition.methods, {
+        data: Object.assign(JSON.parse(JSON.stringify(definition.data)), {
+          stage: 'details', deletionEpoch: 0, offlineSaved: false,
+          form: { triggerEvent: '', loopThought: '正文', emotions: ['焦虑'], intensity: 6 },
+          result: { record: { _id: 'record-1' } }
+        }),
+        setData(update) { Object.assign(this.data, update); },
+        triggerEvent(name, detail) { events.push({ name, detail }); }
+      });
+      return target;
+    }
+    api.saveRecordDetails = async (id, details) => ({ _id: id, emotions: details.emotions, intensity: details.intensity });
+    auth.ensureLogin = async () => ({ _id: 'user-1' });
+
+    const returning = instance();
+    await returning.saveDetails();
+    assert.strictEqual(returning.data.stage, 'edit', '保存感受后应直接关闭并重置');
+    assert.strictEqual(returning.data.submitting, false);
+    assert.strictEqual(events[0].name, 'close');
+
+    const evaluating = instance();
+    await evaluating.evaluateWithDetails();
+    const evaluation = events.find((event) => event.name === 'evaluate');
+    assert.strictEqual(evaluation.detail.id, 'record-1');
+    assert.strictEqual(evaluating.data.stage, 'edit');
+  } finally {
+    api.saveRecordDetails = original.api;
+    auth.ensureLogin = original.login;
+    global.wx = original.wx;
+    global.getApp = original.app;
+    global.Component = original.component;
+  }
+});
+
 sequence.then(() => {
   console.log(`\n${count} 组测试全部通过。`);
 }).catch((error) => {

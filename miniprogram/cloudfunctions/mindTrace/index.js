@@ -13,6 +13,7 @@ const {
   assertActorUser,
   createUserWriteTouch,
   publicUser,
+  withoutDocumentId,
   emptyPayload,
   normalizeLogin,
   normalizeCreateRecord,
@@ -179,7 +180,7 @@ async function login(openid, payload) {
             createdAt: timestamp,
             updatedAt: timestamp
           };
-          await transaction.collection('users').doc(id).set({ data: current });
+          await transaction.collection('users').doc(id).set({ data: withoutDocumentId(current) });
         } else {
           const updates = { updatedAt: timestamp };
           if (input.nickname !== undefined) updates.nickname = input.nickname;
@@ -334,9 +335,9 @@ async function createRecord(openid, actorUserId, payload) {
     };
     // Write the user before business documents so delete marking conflicts with every real create.
     await transaction.collection('users').doc(user._id).update({ data: createUserWriteTouch(timestamp) });
-    await transaction.collection('records').doc(recordId).set({ data: record });
+    await transaction.collection('records').doc(recordId).set({ data: withoutDocumentId(record) });
     if (newThoughtId) {
-      await transaction.collection('thoughts').doc(newThoughtId).set({ data: { ...thought, ...thoughtUpdates } });
+      await transaction.collection('thoughts').doc(newThoughtId).set({ data: withoutDocumentId({ ...thought, ...thoughtUpdates }) });
     } else {
       await transaction.collection('thoughts').doc(thought._id).update({ data: thoughtUpdates });
     }

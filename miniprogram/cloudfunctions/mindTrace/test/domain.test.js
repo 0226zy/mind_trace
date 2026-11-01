@@ -11,6 +11,7 @@ const {
   assertActorUser,
   createUserWriteTouch,
   publicUser,
+  withoutDocumentId,
   normalizeCreateRecord,
   normalizePatchRecord,
   normalizeListRecords,
@@ -275,4 +276,12 @@ test('强度统计忽略 null、缺失和非整数，不产生 NaN 或零值污�
     createdAt: '2026-10-25T01:00:00.000Z'
   }], now);
   assert.deepEqual(empty.intensityTrend, []);
+});
+
+test('document.set 写入副本移除 _id 且不修改原对象', () => {
+  const original = { _id: 'u_fixed', ownerOpenid: 'owner', nickname: '止念用户' };
+  const data = withoutDocumentId(original);
+  assert.deepEqual(data, { ownerOpenid: 'owner', nickname: '止念用户' });
+  assert.equal(Object.hasOwn(data, '_id'), false);
+  assert.deepEqual(original, { _id: 'u_fixed', ownerOpenid: 'owner', nickname: '止念用户' });
 });

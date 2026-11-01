@@ -6,7 +6,7 @@ Page({
   data: { loading: true, error: '', stats: null, emotions: [], trend: [], completionRate: '0%', recurringCount: 0 },
   onShow() { this.load(); },
   async load() {
-    this.setData({ loading: true, error: '' });
+    this.setData({ loading: !this.data.stats, error: '' });
     try {
       await auth.ensureLogin();
       const stats = await api.stats();

@@ -30,7 +30,7 @@ Page({
     this.load(true);
   },
   async load(reset) {
-    if (reset) this.setData({ loading: true, error: '', page: 1, items: [] });
+    if (reset) this.setData({ loading: !this.data.items.length, error: '', page: 1 });
     else this.setData({ loadingMore: true });
     const page = reset ? 1 : this.data.page + 1;
     try {

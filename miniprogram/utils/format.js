@@ -39,6 +39,7 @@ function normalizeThought(item) {
   return Object.assign({}, thought, {
     id: thought.id || thought._id,
     title: thought.title || latest.triggerEvent || latest.trigger || '未命名思虑',
+    excerpt: latest.loopThought || thought.excerpt || '',
     versionCount: Number(count),
     statusText: statusText(thought.status || latest.status),
     lastRecordAtText: formatTime(thought.lastRecordAt || latest.createdAt || thought.updatedAt),

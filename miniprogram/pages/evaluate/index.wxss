@@ -1,46 +1,52 @@
-.evaluate-page { padding-bottom: calc(56rpx + env(safe-area-inset-bottom)); }
-.evaluate-header { margin-bottom: 46rpx; }
-.evaluate-header .h1 { margin: 8rpx 0 12rpx; }
-.evaluate-header .progress-track { margin-top: 22rpx; }
-.inherit-note { display: block; color: #5D6B62; background: #EEF1EB; border-radius: 12rpx; padding: 16rpx 20rpx; margin-top: 22rpx; font-size: 24rpx; }
-.step-body { min-height: 520rpx; }
+.evaluate-page { padding-bottom: calc(48rpx + env(safe-area-inset-bottom)); }
+.evaluate-topbar { min-height: 88rpx; display: flex; align-items: center; justify-content: space-between; gap: 12rpx; }
+.topbar-btn { width: 96rpx; min-height: 88rpx; padding: 0; background: transparent; color: var(--color-muted); font-size: 25rpx; }
+.topbar-right { text-align: right; }
+.topbar-spacer { width: 96rpx; }
+.step-position { color: var(--color-text); font-size: 26rpx; font-weight: 500; }
+.evaluate-page .progress-track { margin-top: 8rpx; }
+.evaluate-notes { margin-bottom: 12rpx; }
+.inherit-note { display: block; color: #5D6B62; background: #EEF1EB; border-radius: var(--radius-m); padding: 16rpx 20rpx; margin-top: 22rpx; font-size: 24rpx; }
+.step-body { min-height: 500rpx; padding-top: 48rpx; }
 .question { font-size: 36rpx; line-height: 1.5; font-weight: 600; margin-bottom: 14rpx; }
-.guidance { display: block; color: #737D76; font-size: 26rpx; margin-bottom: 34rpx; }
-.choice-card { width: 100%; min-height: 148rpx; padding: 28rpx 4rpx; margin-bottom: 0; border: 0; border-top: 1rpx solid #E1E4DE; border-radius: 0; background: transparent; color: #69736E; text-align: left; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; font-size: 25rpx; }
-.choice-card:last-child { border-bottom: 1rpx solid #E1E4DE; }
-.choice-title { color: #303834; font-size: 32rpx; font-weight: 600; margin-bottom: 8rpx; }
-.choice-selected { background: #EDF1EB; padding-left: 22rpx; padding-right: 22rpx; border-top-color: #607D72; }
+.guidance { display: block; color: var(--color-muted); font-size: 25rpx; margin-bottom: 32rpx; }
+.choice-card { width: 100%; min-height: 140rpx; padding: 28rpx 16rpx; margin-bottom: 0; border: 0; border-top: 1rpx solid var(--color-line); border-radius: 0; background: transparent; color: var(--color-muted); text-align: left; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; font-size: 25rpx; }
+.choice-card:last-child { border-bottom: 1rpx solid var(--color-line); }
+.choice-title { color: var(--color-text); font-size: 31rpx; font-weight: 600; margin-bottom: 8rpx; }
+.choice-selected { background: #E9ECE5; border-top-color: #607D72; box-shadow: inset 4rpx 0 0 var(--color-accent); }
 .large-textarea { min-height: 260rpx; }
-.probability-value { color: #385C57; text-align: center; font-size: 88rpx; font-weight: 500; padding: 50rpx 0 30rpx; }
-.probability-value text { font-size: 32rpx; margin-left: 6rpx; }
-.slider-labels { color: #818983; font-size: 22rpx; }
-.low-probability { margin-top: 48rpx; }
+.probability-value { color: var(--color-accent); font-size: 48rpx; font-weight: 500; padding: 22rpx 0 12rpx; }
+.probability-value text { font-size: 26rpx; margin-left: 6rpx; }
+.slider-labels { color: var(--color-muted); font-size: 22rpx; }
+.low-probability { margin-top: 40rpx; }
 .action-list, .cross-list { margin-top: 26rpx; }
-.action-item, .cross-item { width: 100%; min-height: 88rpx; padding: 20rpx 4rpx; border: 0; border-bottom: 1rpx solid #E1E4DE; border-radius: 0; background: transparent; display: flex; align-items: center; gap: 18rpx; text-align: left; color: #3D4741; font-size: 27rpx; }
+.action-item, .cross-item { width: 100%; min-height: 88rpx; padding: 20rpx 4rpx; border: 0; border-bottom: 1rpx solid var(--color-line); border-radius: 0; background: transparent; display: flex; align-items: center; gap: 18rpx; text-align: left; color: #3D4741; font-size: 27rpx; }
 .check-box { width: 42rpx; height: 42rpx; border: 2rpx solid #9BA69F; border-radius: 6rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.checked { background: #385C57; color: #FFFFFF; border-color: #385C57; }
+.checked { background: var(--color-accent); color: #FFFFFF; border-color: var(--color-accent); }
 .cross-item.crossed { background: #F0F1EC; }
-.cross-mark { color: #385C57; flex-shrink: 0; }
-.cross-hint { margin-left: auto; color: #737D76; font-size: 23rpx; flex-shrink: 0; }
-.scenario-field { margin-top: 30rpx; }
-.confirmation-item { width: 100%; min-height: 132rpx; padding: 26rpx 4rpx; margin-bottom: 0; border: 0; border-top: 1rpx solid #E1E4DE; border-radius: 0; background: transparent; display: flex; align-items: center; gap: 24rpx; text-align: left; color: #3D4741; font-size: 28rpx; line-height: 1.6; }
-.confirmation-item:last-child { border-bottom: 1rpx solid #E1E4DE; }
+.cross-mark { color: var(--color-accent); flex-shrink: 0; }
+.cross-hint { margin-left: auto; color: var(--color-muted); font-size: 23rpx; flex-shrink: 0; }
+.scenario-field { margin-top: 28rpx; }
+.confirmation-item { width: 100%; min-height: 124rpx; padding: 26rpx 12rpx; margin-bottom: 0; border: 0; border-top: 1rpx solid var(--color-line); border-radius: 0; background: transparent; display: flex; align-items: center; gap: 24rpx; text-align: left; color: #3D4741; font-size: 28rpx; line-height: 1.6; }
+.confirmation-item:last-child { border-bottom: 1rpx solid var(--color-line); }
 .confirmation-number { width: 52rpx; height: 52rpx; border-radius: 50%; border: 1rpx solid #9BA69F; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #657269; }
-.confirmation-done { background: #EDF1EB; padding-left: 20rpx; padding-right: 20rpx; }
-.confirmation-done .confirmation-number { background: #385C57; border-color: #385C57; color: #FFFFFF; }
-.step-error { margin-top: 24rpx; }
-.save-state { min-height: 44rpx; text-align: center; color: #818983; font-size: 23rpx; }
-.evaluate-actions { display: flex; gap: 18rpx; margin-top: 18rpx; }
-.evaluate-actions button { flex: 1; }
-.evaluate-actions .primary-btn { flex: 1.7; }
-.minor-actions { display: flex; justify-content: center; gap: 40rpx; }
-.readonly-card { margin-bottom: 20rpx; }
+.confirmation-done { background: #E9ECE5; box-shadow: inset 4rpx 0 0 var(--color-accent); }
+.confirmation-done .confirmation-number { background: var(--color-accent); border-color: var(--color-accent); color: #FFFFFF; }
+.step-error { min-height: 60rpx; margin: 0; padding-top: 18rpx; visibility: hidden; }
+.step-error.is-visible { visibility: visible; }
+.save-state { min-height: 40rpx; text-align: center; color: var(--color-muted); font-size: 23rpx; }
+.next-btn { margin-top: 12rpx; }
+.minor-actions { display: flex; justify-content: center; gap: 56rpx; }
+.readonly-title { margin: 32rpx 0; }
+.readonly-card { padding: 28rpx 0; border-bottom: 1rpx solid var(--color-line); }
 .probability-tag { margin-top: 18rpx; }
 .readonly-line { padding: 12rpx 0; overflow-wrap: anywhere; }
+.readonly-back { margin-top: 36rpx; }
 .scenario-read { margin-top: 20rpx; }
-.scenario-read > text { display: block; color: #737D76; font-size: 24rpx; margin-bottom: 6rpx; }
-.completion-view { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 24rpx; color: #69736E; }
-.breath-circle { width: 220rpx; height: 220rpx; border-radius: 50%; background: #E6EDE7; color: #385C57; display: flex; align-items: center; justify-content: center; margin-bottom: 34rpx; animation: breathing 3s ease-in-out infinite; }
-.success-mark { color: #385C57; font-size: 58rpx; }
+.scenario-read > text { display: block; color: var(--color-muted); font-size: 24rpx; margin-bottom: 6rpx; }
+.completion-view { min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 24rpx; color: var(--color-muted); }
+.breath-circle { width: 220rpx; height: 220rpx; border-radius: 50%; background: #E9ECE5; color: var(--color-accent); display: flex; align-items: center; justify-content: center; margin-bottom: 34rpx; animation: breathing 3s ease-in-out infinite; }
+.completion-line { width: 64rpx; height: 3rpx; background: var(--color-accent); margin-bottom: 20rpx; }
 .completion-copy { margin-bottom: 32rpx; }
 @keyframes breathing { 0%,100% { transform: scale(.78); opacity: .6; } 50% { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .breath-circle { animation: none; } }

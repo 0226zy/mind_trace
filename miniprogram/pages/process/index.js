@@ -8,7 +8,7 @@ Page({
   onShow() { this.load(); },
   onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
   async load() {
-    this.setData({ loading: true, error: '' });
+    this.setData({ loading: !this.data.records.length, error: '' });
     this.refreshOffline();
     try {
       await auth.ensureLogin();
